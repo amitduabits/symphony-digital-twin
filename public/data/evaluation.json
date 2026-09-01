@@ -1,0 +1,301 @@
+{
+  "config": {
+    "name": "symphony_eval_quick_test",
+    "scenario_name": "quick_test",
+    "duration_seconds": 180,
+    "replications": 3
+  },
+  "timestamp": "2025-11-28T15:27:58.179264",
+  "controller_summary": {
+    "FixedTime": {
+      "avg_delay_per_vehicle_seconds": {
+        "mean": 24.35,
+        "std": 0.06,
+        "min": 24.27,
+        "max": 24.42,
+        "n": 3
+      },
+      "avg_speed_kmh": {
+        "mean": 32.18,
+        "std": 0.67,
+        "min": 31.37,
+        "max": 33.0,
+        "n": 3
+      },
+      "throughput_vehicles_per_hour": {
+        "mean": 11393.33,
+        "std": 476.19,
+        "min": 10720.0,
+        "max": 11740.0,
+        "n": 3
+      },
+      "travel_time_index": {
+        "mean": 1.24,
+        "std": 0.03,
+        "min": 1.21,
+        "max": 1.28,
+        "n": 3
+      },
+      "gini_coefficient": {
+        "mean": 0.27,
+        "std": 0.0,
+        "min": 0.27,
+        "max": 0.27,
+        "n": 3
+      },
+      "avg_queue_length": {
+        "mean": 11.17,
+        "std": 0.95,
+        "min": 10.0,
+        "max": 12.33,
+        "n": 3
+      },
+      "estimated_co2_kg": {
+        "mean": 119.69,
+        "std": 6.05,
+        "min": 111.91,
+        "max": 126.67,
+        "n": 3
+      }
+    },
+    "Actuated": {
+      "avg_delay_per_vehicle_seconds": {
+        "mean": 33.79,
+        "std": 0.24,
+        "min": 33.47,
+        "max": 34.03,
+        "n": 3
+      },
+      "avg_speed_kmh": {
+        "mean": 26.08,
+        "std": 0.05,
+        "min": 26.0,
+        "max": 26.12,
+        "n": 3
+      },
+      "throughput_vehicles_per_hour": {
+        "mean": 10486.67,
+        "std": 397.44,
+        "min": 9960.0,
+        "max": 10920.0,
+        "n": 3
+      },
+      "travel_time_index": {
+        "mean": 1.53,
+        "std": 0.0,
+        "min": 1.53,
+        "max": 1.54,
+        "n": 3
+      },
+      "gini_coefficient": {
+        "mean": 0.27,
+        "std": 0.0,
+        "min": 0.27,
+        "max": 0.27,
+        "n": 3
+      },
+      "avg_queue_length": {
+        "mean": 19.89,
+        "std": 0.08,
+        "min": 19.83,
+        "max": 20.0,
+        "n": 3
+      },
+      "estimated_co2_kg": {
+        "mean": 91.94,
+        "std": 4.07,
+        "min": 88.03,
+        "max": 97.56,
+        "n": 3
+      }
+    },
+    "MaxPressure": {
+      "avg_delay_per_vehicle_seconds": {
+        "mean": 4.75,
+        "std": 0.13,
+        "min": 4.63,
+        "max": 4.92,
+        "n": 3
+      },
+      "avg_speed_kmh": {
+        "mean": 38.29,
+        "std": 0.4,
+        "min": 37.9,
+        "max": 38.83,
+        "n": 3
+      },
+      "throughput_vehicles_per_hour": {
+        "mean": 12706.67,
+        "std": 356.4,
+        "min": 12320.0,
+        "max": 13180.0,
+        "n": 3
+      },
+      "travel_time_index": {
+        "mean": 1.04,
+        "std": 0.01,
+        "min": 1.03,
+        "max": 1.06,
+        "n": 3
+      },
+      "gini_coefficient": {
+        "mean": 0.27,
+        "std": 0.0,
+        "min": 0.27,
+        "max": 0.27,
+        "n": 3
+      },
+      "avg_queue_length": {
+        "mean": 2.44,
+        "std": 0.57,
+        "min": 1.67,
+        "max": 3.0,
+        "n": 3
+      },
+      "estimated_co2_kg": {
+        "mean": 149.87,
+        "std": 5.15,
+        "min": 145.2,
+        "max": 157.05,
+        "n": 3
+      }
+    },
+    "Webster": {
+      "avg_delay_per_vehicle_seconds": {
+        "mean": 6.04,
+        "std": 0.27,
+        "min": 5.69,
+        "max": 6.35,
+        "n": 3
+      },
+      "avg_speed_kmh": {
+        "mean": 37.71,
+        "std": 0.38,
+        "min": 37.2,
+        "max": 38.13,
+        "n": 3
+      },
+      "throughput_vehicles_per_hour": {
+        "mean": 12386.67,
+        "std": 503.94,
+        "min": 11680.0,
+        "max": 12820.0,
+        "n": 3
+      },
+      "travel_time_index": {
+        "mean": 1.06,
+        "std": 0.01,
+        "min": 1.05,
+        "max": 1.08,
+        "n": 3
+      },
+      "gini_coefficient": {
+        "mean": 0.27,
+        "std": 0.0,
+        "min": 0.27,
+        "max": 0.27,
+        "n": 3
+      },
+      "avg_queue_length": {
+        "mean": 3.28,
+        "std": 0.55,
+        "min": 2.67,
+        "max": 4.0,
+        "n": 3
+      },
+      "estimated_co2_kg": {
+        "mean": 143.07,
+        "std": 6.25,
+        "min": 134.63,
+        "max": 149.58,
+        "n": 3
+      }
+    },
+    "SYMPHONY": {
+      "avg_delay_per_vehicle_seconds": {
+        "mean": 8.29,
+        "std": 0.19,
+        "min": 8.05,
+        "max": 8.51,
+        "n": 3
+      },
+      "avg_speed_kmh": {
+        "mean": 37.59,
+        "std": 0.45,
+        "min": 36.97,
+        "max": 38.02,
+        "n": 3
+      },
+      "throughput_vehicles_per_hour": {
+        "mean": 12560.0,
+        "std": 700.29,
+        "min": 11820.0,
+        "max": 13500.0,
+        "n": 3
+      },
+      "travel_time_index": {
+        "mean": 1.06,
+        "std": 0.01,
+        "min": 1.05,
+        "max": 1.08,
+        "n": 3
+      },
+      "gini_coefficient": {
+        "mean": 0.27,
+        "std": 0.0,
+        "min": 0.27,
+        "max": 0.27,
+        "n": 3
+      },
+      "avg_queue_length": {
+        "mean": 3.44,
+        "std": 0.64,
+        "min": 2.83,
+        "max": 4.33,
+        "n": 3
+      },
+      "estimated_co2_kg": {
+        "mean": 147.91,
+        "std": 9.6,
+        "min": 137.41,
+        "max": 160.61,
+        "n": 3
+      }
+    }
+  },
+  "comparisons": {
+    "Actuated_vs_FixedTime": {
+      "delay_improvement_pct": -39.7,
+      "throughput_improvement_pct": -7.1,
+      "speed_improvement_pct": -18.9,
+      "equity_improvement_pct": -0.8,
+      "queue_improvement_pct": -77.6,
+      "emissions_reduction_pct": 21.3
+    },
+    "MaxPressure_vs_FixedTime": {
+      "delay_improvement_pct": 79.8,
+      "throughput_improvement_pct": 14.9,
+      "speed_improvement_pct": 17.8,
+      "equity_improvement_pct": -1.7,
+      "queue_improvement_pct": 73.1,
+      "emissions_reduction_pct": -29.7
+    },
+    "Webster_vs_FixedTime": {
+      "delay_improvement_pct": 73.9,
+      "throughput_improvement_pct": 9.0,
+      "speed_improvement_pct": 17.4,
+      "equity_improvement_pct": -1.3,
+      "queue_improvement_pct": 71.6,
+      "emissions_reduction_pct": -20.3
+    },
+    "SYMPHONY_vs_FixedTime": {
+      "delay_improvement_pct": 65.1,
+      "throughput_improvement_pct": 10.3,
+      "speed_improvement_pct": 14.9,
+      "equity_improvement_pct": -1.0,
+      "queue_improvement_pct": 61.2,
+      "emissions_reduction_pct": -22.8
+    }
+  },
+  "total_runtime_seconds": 0.0
+}
