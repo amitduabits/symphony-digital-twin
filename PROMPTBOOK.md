@@ -272,18 +272,21 @@ Publish the industry demo from GitHub Pages so a partner only needs a URL.
 1. Repo: amitduabits/symphony-digital-twin (public).
 2. vite base is /symphony-digital-twin/ in CI and '/' locally.
 3. HashRouter stays (refresh-safe on Pages).
-4. Workflow .github/workflows/pages.yml:
-   - on push to main
-   - npm ci
-   - npm test
-   - npm run build with BASE_PATH=/symphony-digital-twin/
-   - upload dist
-   - deploy to github-pages environment
-5. Enable Pages: Build from GitHub Actions.
-6. After deploy, curl the URL and the /#/app hash document.
+4. Preferred: GitHub Actions from `docs/github-pages-workflow.yml` (needs `workflow` OAuth scope).
+   Until that scope exists, publish the `dist/` folder to the `gh-pages` branch:
+
+   ```
+   $env:BASE_PATH="/symphony-digital-twin/"
+   npm test
+   npm run build
+   # push dist as branch gh-pages
+   ```
+
+5. Pages source: branch `gh-pages`, folder `/`.
+6. After deploy, curl the URL and open `/#/app`.
 7. Put the live URL at the top of README.
 
-Live URL target:
+Live URL:
 https://amitduabits.github.io/symphony-digital-twin/
 
 Do not use Streamlit Cloud for the industry briefing. This app is the briefing.
