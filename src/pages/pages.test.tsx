@@ -39,7 +39,9 @@ describe("website pages", () => {
     mount(<IntellectualProperty />);
     expect(screen.getAllByText("202611024014").length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Yushu Excellence Technologies/).length).toBeGreaterThan(0);
-    expect(screen.getByText(/First Examination Report response submitted/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/amended claims 1–10/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/FER dated 23 June 2026/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Claim 7/i).length).toBeGreaterThan(0);
   });
 
   it("partnership exposes a named form to Amit Dua", () => {

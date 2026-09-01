@@ -46,7 +46,7 @@ describe("command centre", () => {
     mount();
 
     await user.click(screen.getByRole("button", { name: "Agents" }));
-    expect(screen.getByText(/Level 3 · City Strategist/i)).toBeInTheDocument();
+    expect(screen.getByText(/Third language model/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "T-GNN" }));
     expect(screen.getByText(/18-d feature vector/i)).toBeInTheDocument();
@@ -69,6 +69,7 @@ describe("command centre", () => {
     const select = screen.getByDisplayValue(/Morning peak/i);
     const options = Array.from(select.querySelectorAll("option")).map((o) => o.value);
     expect(options).toEqual(SCENARIOS.map((s) => s.id));
+    expect(options).toContain("outage");
   });
 
   it("pauses and resets", async () => {

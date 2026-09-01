@@ -1,6 +1,6 @@
 import { SiteNav } from "../components/SiteNav";
 import { SiteFooter } from "../components/SiteFooter";
-import { CONTACT, PATENT } from "../engine";
+import { CLAIMS, CONTACT, PATENT } from "../engine";
 
 export function IntellectualProperty() {
   return (
@@ -8,10 +8,11 @@ export function IntellectualProperty() {
       <SiteNav />
       <div className="page-head">
         <div className="kicker" style={{ color: "var(--teal)" }}>Intellectual property</div>
-        <h1>Filed, examined, and ready to discuss under campus rules.</h1>
+        <h1>Amended claims 1–10, as submitted with the FER response.</h1>
         <p>
-          BITS Pilani asked that this work be shared with industry. The patent is the envelope
-          around the software. This page is the briefing note a visitor can take away.
+          Indian Patent Application {PATENT.number}. FER dated {PATENT.ferDate}. Response and
+          amended claims filed {PATENT.responseDate}. The wording below is the industry map of
+          those claims, not a substitute for the complete specification.
         </p>
       </div>
       <section className="section" style={{ paddingTop: 0 }}>
@@ -26,7 +27,7 @@ export function IntellectualProperty() {
           </article>
           <article className="card">
             <h3>Status</h3>
-            <p>{PATENT.status} Sharing with industry is for demonstration and partnership discussion, not a public claim-by-claim dump of the amended set.</p>
+            <p>{PATENT.status}</p>
           </article>
           <article className="card">
             <h3>Applicant</h3>
@@ -37,47 +38,53 @@ export function IntellectualProperty() {
             </p>
           </article>
           <article className="card">
-            <h3>Inventor</h3>
+            <h3>Inventor and agent</h3>
             <p>
               {PATENT.inventor}
               <br />
               {CONTACT.dept}, {PATENT.campus}
+              <br />
+              Agent: {PATENT.agent}
             </p>
           </article>
         </div>
 
-        <h2 style={{ marginTop: "3rem" }}>What is protected, in plain language</h2>
-        <div className="grid-3">
-          <article className="card">
-            <h3>Hierarchical LLM control</h3>
-            <p>
-              Different models, different timescales, bidirectional flow: directives down, reports
-              up. Not a single flat agent on every signal.
-            </p>
-          </article>
-          <article className="card">
-            <h3>Predict-then-actuate</h3>
-            <p>
-              An 18-feature temporal GNN sits between fused observations and the agents, so control
-              is not purely reactive.
-            </p>
-          </article>
-          <article className="card">
-            <h3>Open-data twin</h3>
-            <p>
-              OSM geometry, SUMO microsimulation, public speed APIs. The twin is how a plan is
-              tried before it is deployed.
-            </p>
-          </article>
+        <h2 style={{ marginTop: "3rem" }}>Claim 1 — the independent claim</h2>
+        <article className="card">
+          <p>
+            A hierarchical multi-agent system for adaptive traffic signal control with temporal
+            prediction. Three distinct language models, different in parameter scale and inference
+            latency, are assigned by decision timescale: the largest and slowest at network level
+            (hours), the middle at corridor level (minutes), the smallest and fastest at each
+            junction (sub-second). A spatiotemporal predictor feeds all three levels. Signal
+            controllers actuate physically and fall back to local logic if the centre drops out.
+            Fusion, a rolling-window store, command generation, and post-actuation feedback close
+            the loop. The system keeps running under partial data, communication, or hardware
+            failure.
+          </p>
+        </article>
+
+        <h2 style={{ marginTop: "3rem" }}>Claims 2–10 — the dependent set</h2>
+        <div className="grid-2">
+          {CLAIMS.filter((c) => c.n > 1).map((c) => (
+            <article key={c.n} className="card">
+              <h3>
+                Claim {c.n} · {c.title}
+              </h3>
+              <p>{c.gist}</p>
+            </article>
+          ))}
         </div>
 
         <article className="card" style={{ marginTop: "1.4rem" }}>
           <h3>How industry should treat this demo</h3>
           <p>
-            The website and command centre implement the architecture for demonstration. They do not
-            replace the research repository, the SUMO evaluation, or a licensed field deployment.
-            Commercial use, OEM integration, or a city pilot should go through BITS Pilani and the
-            applicant company, with an NDA if claim charts or source models are required.
+            The command centre is built so a visitor can see each claimed module working: two-source
+            fusion, an eight-snapshot window, GraphConv + Bi-LSTM + attention forecasts, three
+            timescale-matched agents, a 200 ms junction budget, corridor offsets, incident/VIP
+            directives, predicted-versus-observed residuals, and a comms-outage fail-safe. It is a
+            demonstration, not a live police deployment and not a licence. Commercial use goes
+            through BITS Pilani and the applicant company.
           </p>
         </article>
       </section>

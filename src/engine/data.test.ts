@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CONTACT, EVALUATION, JUNCTIONS, PATENT, SCENARIOS } from "./data";
+import { CLAIMS, CONTACT, EVALUATION, JUNCTIONS, PATENT, SCENARIOS } from "./data";
 
 describe("corridor data", () => {
   it("lists the six ORR junctions in Silk Board to Marathahalli order", () => {
@@ -31,6 +31,7 @@ describe("corridor data", () => {
       "vip",
       "rain",
       "weekend",
+      "outage",
     ]);
   });
 
@@ -49,6 +50,9 @@ describe("published identities", () => {
     expect(PATENT.number).toBe("202611024014");
     expect(PATENT.applicant).toMatch(/Yushu Excellence Technologies/);
     expect(PATENT.inventor).toBe("Amit Dua");
+    expect(PATENT.claimCount).toBe(10);
+    expect(CLAIMS).toHaveLength(10);
+    expect(CLAIMS[0].kind).toBe("Independent");
     expect(CONTACT.email).toBe("amit.dua@pilani.bits-pilani.ac.in");
   });
 

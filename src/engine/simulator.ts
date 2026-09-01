@@ -60,6 +60,12 @@ function seedJunction(i: number): JunctionState {
     decisionConfidence: 0.8,
     anomaly: false,
     incident: false,
+    failSafe: false,
+    decisionMs: 90,
+    freshness: 0.9,
+    accuracy: 0.85,
+    consistency: 0.88,
+    predictionError: 1.2,
   };
 }
 
@@ -137,6 +143,7 @@ export function createInitialState(scenario: ScenarioId = "morning_rush"): TwinS
     symphony: emptyKpis(),
     fixed: emptyKpis(),
     alerts: [],
+    snapshots: [],
   };
 }
 
@@ -198,6 +205,9 @@ function fuse(j: JunctionState, simTime: number) {
   const median = (j.googleSpeed + j.tomtomSpeed) / 2;
   const consG = 1 - clamp(Math.abs(j.googleSpeed - median) / 20, 0, 1);
   const consT = 1 - clamp(Math.abs(j.tomtomSpeed - median) / 20, 0, 1);
+  j.freshness = 0.5 * freshnessG + 0.5 * freshnessT;
+  j.accuracy = 0.5 * accuracyG + 0.5 * accuracyT;
+  j.consistency = 0.5 * consG + 0.5 * consT;
 
   let wG = 0.5 * freshnessG + 0.3 * accuracyG + 0.2 * consG;
   let wT = 0.5 * freshnessT + 0.3 * accuracyT + 0.2 * consT;
@@ -214,6 +224,7 @@ function fuse(j: JunctionState, simTime: number) {
   const meas = j.googleWeight * j.googleSpeed + j.tomtomWeight * j.tomtomSpeed;
   j.fusedSpeed = clamp(0.65 * meas + 0.35 * j.fusedSpeed, 5, 55);
   j.confidence = clamp(0.55 + 0.35 * (1 - jump / 25) + (j.anomaly ? -0.15 : 0.05), 0.35, 0.98);
+  j.predictionError = Math.abs(j.predicted.m5 - j.fusedSpeed);
 }
 
 function predict(junctions: JunctionState[], scenario: ScenarioId, simTime: number) {
@@ -245,6 +256,18 @@ function pushEvent(state: TwinState, event: Omit<AgentEvent, "id" | "simTime">) 
 
 function symphonyControl(state: TwinState, j: JunctionState, index: number) {
   const sc = scenarioOf(state.scenario);
+  if (sc.outage) {
+    j.failSafe = true;
+    j.decisionMs = 35 + Math.random() * 25;
+    j.lastAction = "fail-safe local";
+    j.lastReason =
+      "Communication lost beyond the outage interval. Revert to locally stored control logic.";
+    j.decisionConfidence = 1;
+    fixedControl(j);
+    return;
+  }
+  j.failSafe = false;
+  j.decisionMs = 70 + Math.random() * 110;
   const nsLoad = j.ns.queue + 0.6 * j.ns.approaching;
   const ewLoad = j.ew.queue + 0.6 * j.ew.approaching;
   const predictedDrop = j.fusedSpeed - j.predicted.m15;
@@ -378,6 +401,21 @@ function maybeAgents(state: TwinState, dt: number) {
   const worst = [...state.junctions].sort((a, b) => b.congestion - a.congestion)[0];
   const sc = scenarioOf(state.scenario);
 
+  if (sc.outage) {
+    state.strategy = "Central link lost. Junction agents on stored local logic. No new network directives.";
+    state.corridorPlan = "Offsets frozen. Fail-safe until the outage interval clears.";
+    if (state.simTime % 60 < dt) {
+      pushEvent(state, {
+        level: "strategist",
+        agent: "City Strategist",
+        action: "Comms outage protocol",
+        reason: "Network-level agent unreachable. Junction controllers keep actuating from local logic.",
+        confidence: 0.99,
+      });
+    }
+    return;
+  }
+
   if (state.simTime % 60 < dt) {
     if (sc.vip) {
       state.strategy = "VIP eastbound corridor. Hold conflicting phases. Release platoons at Bellandur.";
@@ -453,6 +491,7 @@ function alerts(state: TwinState) {
   const sc = scenarioOf(state.scenario);
   if (sc.vip) list.unshift("VIP movement: eastbound green corridor.");
   if (sc.rain) list.unshift("Monsoon: saturation flow reduced 35%.");
+  if (sc.outage) list.unshift("Comms outage: junctions on local fail-safe logic.");
   state.alerts = list.slice(0, 4);
 }
 
@@ -477,6 +516,8 @@ export function tick(state: TwinState, dt = 1): TwinState {
     const fSpeed = state.baseline.reduce((s, j) => s + j.fusedSpeed, 0) / 6;
     const sCong = state.junctions.reduce((s, j) => s + j.congestion, 0) / 6;
     const fCong = state.baseline.reduce((s, j) => s + j.congestion, 0) / 6;
+    const predicted =
+      state.junctions.reduce((s, j) => s + j.predicted.m15, 0) / state.junctions.length;
     state.history.push({
       t: state.simTime,
       symphonySpeed: sSpeed,
@@ -485,8 +526,12 @@ export function tick(state: TwinState, dt = 1): TwinState {
       fixedDelay: state.fixed.delaySeconds,
       symphonyCongestion: sCong,
       fixedCongestion: fCong,
+      predicted,
+      observed: sSpeed,
     });
     if (state.history.length > MAX_HISTORY) state.history.shift();
+    state.snapshots.push({ t: state.simTime, speeds: state.junctions.map((j) => j.fusedSpeed) });
+    if (state.snapshots.length > 8) state.snapshots.shift();
   }
 
   alerts(state);

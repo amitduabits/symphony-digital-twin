@@ -104,6 +104,13 @@ describe("scenario physics", () => {
     const s = run(2, "rain");
     expect(s.alerts.join(" ")).toMatch(/Monsoon|rain/i);
   });
+
+  it("reverts junctions to local fail-safe on comms outage", () => {
+    const s = run(5, "outage");
+    expect(s.junctions.every((j) => j.failSafe)).toBe(true);
+    expect(s.junctions.every((j) => j.decisionMs <= 200)).toBe(true);
+    expect(s.alerts.join(" ")).toMatch(/fail-safe|outage/i);
+  });
 });
 
 describe("controllers and session", () => {
@@ -137,10 +144,16 @@ describe("controllers and session", () => {
     expect(b.symphony.vehicles).toBeGreaterThanOrEqual(a.symphony.vehicles);
   });
 
-  it("caps event and history buffers", () => {
+  it("caps event, history, and the eight-snapshot rolling window", () => {
     const s = run(900);
     expect(s.events.length).toBeLessThanOrEqual(80);
     expect(s.history.length).toBeLessThanOrEqual(90);
+    expect(s.snapshots.length).toBeLessThanOrEqual(8);
+  });
+
+  it("keeps junction decisions inside the 200 ms budget", () => {
+    const s = run(20, "morning_rush");
+    expect(s.junctions.every((j) => j.decisionMs <= 200)).toBe(true);
   });
 });
 

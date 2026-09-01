@@ -17,6 +17,7 @@ import {
   CYCLE_STAGES,
   EVALUATION,
   FEATURES_18,
+  MODELS,
   SCENARIOS,
   congestionColor,
   currentStage,
@@ -269,19 +270,29 @@ function AgentsPane() {
     <div className="ops-grid">
       <div className="hierarchy">
         <div className="level l3">
-          <h3>Level 3 · City Strategist</h3>
+          <h3>Level 3 · {MODELS.network.label}</h3>
+          <p className="tiny">
+            {MODELS.network.scale} · {MODELS.network.latency}
+          </p>
           <p>{state.strategy}</p>
         </div>
         <div className="level l2">
-          <h3>Level 2 · Corridor Coordinator</h3>
+          <h3>Level 2 · {MODELS.corridor.label}</h3>
+          <p className="tiny">
+            {MODELS.corridor.scale} · {MODELS.corridor.latency}
+          </p>
           <p>{state.corridorPlan}</p>
         </div>
         <div className="level l1">
-          <h3>Level 1 · Junction agents</h3>
+          <h3>Level 1 · {MODELS.junction.label}</h3>
+          <p className="tiny">
+            {MODELS.junction.scale} · {MODELS.junction.latency}
+          </p>
           <div className="chips">
             {state.junctions.map((j) => (
               <span key={j.id} className="chip">
-                {j.short} {j.phase} · {j.lastAction}
+                {j.short} {j.phase} · {j.decisionMs.toFixed(0)} ms
+                {j.failSafe ? " · FAIL-SAFE" : ""} · {j.lastAction}
               </span>
             ))}
           </div>
@@ -325,7 +336,10 @@ function PredictPane() {
       </div>
       <div className="panel">
         <h3>18-d feature vector</h3>
-        <p className="tiny">Each junction is encoded before GraphConv → Bi-LSTM → attention.</p>
+        <p className="tiny">
+          Claim 5: GraphConv (space) + bidirectional LSTM (time) + multi-head attention. Claim 1:
+          these forecasts are supplied to junction, corridor, and network agents.
+        </p>
         <div className="chips">
           {FEATURES_18.map((f) => (
             <span key={f} className="chip">
@@ -334,8 +348,12 @@ function PredictPane() {
           ))}
         </div>
         <p className="tiny" style={{ marginTop: 16 }}>
-          Spatial MAE 3.23 km/h · temporal MAE 6.01 km/h on the published corridor set. This pane
-          shows the live twin forecast, not a replay of the trained checkpoint.
+          Spatial MAE 3.23 km/h · temporal MAE 6.01 km/h. Rolling window {state.snapshots.length}/8
+          snapshots (claim 4). Mean |predicted − observed|{" "}
+          {(
+            state.junctions.reduce((s, j) => s + j.predictionError, 0) / state.junctions.length
+          ).toFixed(1)}{" "}
+          km/h (claim 10).
         </p>
       </div>
     </div>
@@ -374,8 +392,10 @@ function FusionPane() {
           <div key={j.id} className="panel" style={{ marginBottom: 8 }}>
             <h3>{j.name}</h3>
             <div className="tiny">
-              w_G {j.googleWeight.toFixed(2)} · w_T {j.tomtomWeight.toFixed(2)} · confidence{" "}
-              {(j.confidence * 100).toFixed(0)}%{j.anomaly ? " · ANOMALY down-weighted" : ""}
+              w_G {j.googleWeight.toFixed(2)} · w_T {j.tomtomWeight.toFixed(2)} · freshness{" "}
+              {j.freshness.toFixed(2)} · accuracy {j.accuracy.toFixed(2)} · consistency{" "}
+              {j.consistency.toFixed(2)} · conf {(j.confidence * 100).toFixed(0)}%
+              {j.anomaly ? " · ANOMALY down-weighted" : ""}
             </div>
           </div>
         ))}
@@ -392,6 +412,8 @@ function TwinPane() {
     t: h.t,
     symphony: Number(h.symphonySpeed.toFixed(1)),
     fixed: Number(h.fixedSpeed.toFixed(1)),
+    predicted: Number(h.predicted.toFixed(1)),
+    observed: Number(h.observed.toFixed(1)),
   }));
   return (
     <div>
@@ -432,6 +454,7 @@ function TwinPane() {
               <Tooltip contentStyle={{ background: "#0e1a24", border: "1px solid #1c3344" }} />
               <Area dataKey="symphony" stroke="#3EE0D2" fill="#3EE0D233" />
               <Area dataKey="fixed" stroke="#FF5C5C" fill="#FF5C5C22" />
+              <Area dataKey="predicted" stroke="#9b7bff" fill="#9b7bff22" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -466,7 +489,7 @@ function EvalPane() {
         <div className="kpi-row" style={{ gridTemplateColumns: "repeat(2, 1fr)" }}>
           <Kpi label="Delay reduction" value={`${EVALUATION.paper.delayReduction}%`} />
           <Kpi label="Speed gain" value={`${EVALUATION.paper.speedGain}%`} />
-          <Kpi label="Spatial MAE" value={`${EVALUATION.paper.spatialMae} km/h`} />
+          <Kpi label="Queue reduction" value={`${EVALUATION.paper.queueReduction}%`} />
           <Kpi label="Trials" value={`${EVALUATION.paper.trials} · p<0.001`} />
         </div>
         <p className="tiny">

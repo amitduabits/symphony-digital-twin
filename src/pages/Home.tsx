@@ -12,10 +12,10 @@ export function Home() {
           <div className="kicker">BITS Pilani · Industry briefing</div>
           <h1>A working digital twin for Bengaluru traffic, ready to show a partner.</h1>
           <p className="lede">
-            SYMPHONY fuses public traffic feeds, predicts the next half hour with a temporal graph
-            network, and writes signal plans through a three-level AI hierarchy. The patent is filed.
-            The first examination response is in. This site is the live demonstration the campus can
-            put in front of industry.
+            Amended claims 1–10 sit in front of the Controller. Three language models of different
+            scale and latency run at junction, corridor, and city timescales. A temporal graph
+            network feeds all three. Controllers stay up if the centre drops. This site is the
+            working demonstration the campus can put in front of industry.
           </p>
           <div className="hero-actions">
             <Link to="/app" className="btn btn-teal">
@@ -66,8 +66,8 @@ export function Home() {
           <article className="card">
             <h3>Watch the hierarchy decide</h3>
             <p>
-              City Strategist (hours), Corridor Coordinator (minutes), Junction Agents (seconds).
-              Directives go down. Performance reports come up. Every action carries a reason.
+              Largest, slowest model at network level (hours). Mid-size model at corridor (minutes).
+              Quantized smallest model at each junction, inside 200 ms. Forecasts go to every level.
             </p>
           </article>
           <article className="card">

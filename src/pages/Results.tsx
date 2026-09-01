@@ -26,8 +26,8 @@ export function Results() {
             <span className="muted">mean speed improvement</span>
           </div>
           <div className="stat-card">
-            <b>{EVALUATION.paper.spatialMae}</b>
-            <span className="muted">km/h spatial GNN MAE</span>
+            <b>{EVALUATION.paper.queueReduction}%</b>
+            <span className="muted">queue-length reduction (FER reply)</span>
           </div>
           <div className="stat-card">
             <b>p &lt; 0.001</b>

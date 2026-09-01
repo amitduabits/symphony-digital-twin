@@ -1,6 +1,6 @@
 import { SiteNav } from "../components/SiteNav";
 import { SiteFooter } from "../components/SiteFooter";
-import { FEATURES_18, JUNCTIONS } from "../engine";
+import { FEATURES_18, JUNCTIONS, MODELS } from "../engine";
 
 export function Technology() {
   return (
@@ -10,8 +10,9 @@ export function Technology() {
         <div className="kicker" style={{ color: "var(--teal)" }}>Architecture</div>
         <h1>How the digital twin thinks, every 30 seconds.</h1>
         <p>
-          The filed invention is a closed loop: collect, fuse, predict, decide, actuate, learn. The
-          command-centre app runs that loop on the Silk Board–Marathahalli corridor.
+          Claim 1 is the closed loop: acquire, fuse, store a rolling window, predict, decide at
+          three timescales, actuate, and learn. The command centre runs that loop on the Silk
+          Board–Marathahalli corridor.
         </p>
       </div>
 
@@ -45,16 +46,25 @@ export function Technology() {
           </figure>
           <div>
             <article className="card">
-              <h3>Level 3 · City Strategist</h3>
-              <p>Hourly in the quiet, faster under incidents. Corridor priority, VIP protocol, resource allocation.</p>
+              <h3>Level 3 · Network agent (71)</h3>
+              <p>
+                {MODELS.network.label}. {MODELS.network.scale}. {MODELS.network.latency}. Directives
+                for incidents, VIP movements, and long-term pattern shifts (claims 1, 6, 9).
+              </p>
             </article>
             <article className="card" style={{ marginTop: "1rem" }}>
-              <h3>Level 2 · Corridor Coordinator</h3>
-              <p>Every 2–5 minutes. Green-wave offsets, cycle length, multi-junction balancing.</p>
+              <h3>Level 2 · Corridor agent (72)</h3>
+              <p>
+                {MODELS.corridor.label}. Offsets and coordination constraints from predicted speeds
+                and demand, on a minutes-class cycle (claims 1, 8).
+              </p>
             </article>
             <article className="card" style={{ marginTop: "1rem" }}>
-              <h3>Level 1 · Junction Agents</h3>
-              <p>Sub-second loop. Phase select, duration, emergency pre-emption, safety clamps on min/max green.</p>
+              <h3>Level 1 · Junction agents (73–78)</h3>
+              <p>
+                {MODELS.junction.label}. {MODELS.junction.scale}. Phase and duration inside{" "}
+                {MODELS.junction.latency}. On outage, revert to stored local logic (claims 1, 6, 7).
+              </p>
             </article>
           </div>
         </div>

@@ -24,7 +24,8 @@ export type ScenarioId =
   | "incident"
   | "vip"
   | "rain"
-  | "weekend";
+  | "weekend"
+  | "outage";
 
 export type AgentLevel = "strategist" | "coordinator" | "junction";
 
@@ -69,6 +70,12 @@ export interface JunctionState {
   decisionConfidence: number;
   anomaly: boolean;
   incident: boolean;
+  failSafe: boolean;
+  decisionMs: number;
+  freshness: number;
+  accuracy: number;
+  consistency: number;
+  predictionError: number;
 }
 
 export interface Vehicle {
@@ -105,6 +112,13 @@ export interface HistoryPoint {
   fixedDelay: number;
   symphonyCongestion: number;
   fixedCongestion: number;
+  predicted: number;
+  observed: number;
+}
+
+export interface Snapshot {
+  t: number;
+  speeds: number[];
 }
 
 export interface SessionKpis {
@@ -133,6 +147,7 @@ export interface TwinState {
   symphony: SessionKpis;
   fixed: SessionKpis;
   alerts: string[];
+  snapshots: Snapshot[];
 }
 
 export const CYCLE_STAGES: CycleStage[] = [
