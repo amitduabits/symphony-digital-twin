@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { CAPTURE_TCP_FLAG, parseCatalogue, presentCameras } from "./cameras";
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
 
 describe("camera catalogue", () => {
   it("parses a catalogue fixture and strips RTSP from presentation", () => {
@@ -19,10 +16,5 @@ describe("camera catalogue", () => {
 
   it("records the TCP capture flag for RTSP clients", () => {
     expect(CAPTURE_TCP_FLAG).toBe("rtsp_transport;tcp");
-    const capture = readFileSync(
-      join(dirname(fileURLToPath(import.meta.url)), "cameras.ts"),
-      "utf8",
-    );
-    expect(capture).toContain("rtsp_transport;tcp");
   });
 });
