@@ -26,7 +26,10 @@ npm run dev
 
 1. The live URL above
 2. The 8-minute script in [docs/PARTNER-WALKTHROUGH.md](docs/PARTNER-WALKTHROUGH.md)
-3. How the product is finished and tested: [PROMPTBOOK.md](PROMPTBOOK.md)
+3. How the paper demo is finished and tested: [PROMPTBOOK.md](PROMPTBOOK.md)
+4. How to build the **live** multi-city system (Bengaluru, London, New York, Hong Kong, any city with keys): [docs/LIVE_CITY_PROMPTBOOK.md](docs/LIVE_CITY_PROMPTBOOK.md)
+
+The Pages app is the ORR simulation until that live-city book is executed.
 
 ## Tests
 

@@ -11,6 +11,8 @@ Use this file in three ways:
 Research code stays in [amitduabits/bangalore-traffic-digital-twin](https://github.com/amitduabits/bangalore-traffic-digital-twin).  
 This product is the **industry demonstration**: website + command centre, no API keys, no SUMO.
 
+The **live multi-city** build (Bengaluru, London, New York, Hong Kong, or any city you can access) is a separate book: [docs/LIVE_CITY_PROMPTBOOK.md](docs/LIVE_CITY_PROMPTBOOK.md). Do not tell partners the Pages app is that system until L06+L07 in that book pass.
+
 **Do not put in the public industry repo:** FER PDFs, amended claims, attorney correspondence, GPA drafts, MSME certificates, or unpublished claim charts.
 
 ---
