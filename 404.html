@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SYMPHONY</title>
+    <script>
+      (function () {
+        var base = "/symphony-digital-twin/";
+        var path = location.pathname.replace(base, "/");
+        if (path.indexOf("app") !== -1) {
+          location.replace(base + "#/app");
+        } else {
+          location.replace(base);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <p>Redirecting to the SYMPHONY industry demo…</p>
+  </body>
+</html>
