@@ -20,7 +20,7 @@ function mount() {
 describe("command centre", () => {
   it("shows overview KPIs and all six junctions", () => {
     mount();
-    expect(screen.getByText(/ORR digital twin/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Bengaluru/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText("Silk Board").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Marathahalli").length).toBeGreaterThan(0);
     expect(screen.getByText(/30-second operational cycle/i)).toBeInTheDocument();
@@ -36,6 +36,7 @@ describe("command centre", () => {
       "Fusion",
       "Twin A/B",
       "Evaluation",
+      "Cameras",
     ]) {
       expect(screen.getByRole("button", { name: label })).toBeInTheDocument();
     }

@@ -10,12 +10,12 @@ export function Home() {
       <section className="hero">
         <div className="hero-copy">
           <div className="kicker">BITS Pilani · Industry briefing</div>
-          <h1>A working digital twin for Bengaluru traffic, ready to show a partner.</h1>
+          <h1>A working digital twin for any city you can grant access to.</h1>
           <p className="lede">
-            Amended claims 1–10 sit in front of the Controller. Three language models of different
-            scale and latency run at junction, corridor, and city timescales. A temporal graph
-            network feeds all three. Controllers stay up if the centre drops. This site is the
-            working demonstration the campus can put in front of industry.
+            Bengaluru Outer Ring Road is the reference corridor. London, New York, and Hong Kong
+            ship as city packs. Open the command centre, switch city, and watch fusion, forecasts,
+            and three timescale agents. Observe mode is advisory. Actuate stays off until a licensed
+            pilot.
           </p>
           <div className="hero-actions">
             <Link to="/app" className="btn btn-teal">

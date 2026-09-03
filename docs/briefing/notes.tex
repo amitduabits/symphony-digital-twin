@@ -1,0 +1,124 @@
+\documentclass[listings]{csf301-notes}
+\usepackage{ifthen}
+\input{tikz-library}
+\moduleinfo{01}{SYMPHONY Live City Twin}{Industry briefing}{Amit Dua}
+\begin{document}
+\notestitle
+
+\section{Purpose}
+SYMPHONY is a hierarchical multi-agent system for adaptive traffic signal
+control with temporal prediction (Indian Patent Application 202611024014,
+amended claims 1--10, FER response 31 August 2026). The public industry
+build must do two jobs at once: show the filed architecture, and run as a
+live twin for any city an operator can grant access to.
+
+This note describes the live-city system as implemented for the evening
+briefing. The six-junction Outer Ring Road simulation remains available as
+the paper demo. It is no longer the only path through the command centre.
+
+\begin{definition}[Live city]
+A city is live when the operator can select it, the map and timezone change,
+at least one speed or weather adapter returns a timestamped reading, fusion
+keeps a rolling window of eight snapshots, and the twin continues if a
+source fails.
+\end{definition}
+
+\begin{warning}
+GitHub Pages never holds Google or TomTom keys. Observe mode uses public
+APIs and seed geometry. Recommend mode needs a backend. Actuate is blocked
+until a licensed controller adapter exists.
+\end{warning}
+
+\section{City pack}
+A city is a pack, not a branch of the UI. The pack names the bounding box,
+IANA timezone, agencies, one corridor, adapter list, and a seed junction
+table. OpenStreetMap can replace the seed (geometry source marked
+\texttt{seed} until then).
+
+\begin{keyidea}
+Adding London must not edit Bengaluru code except the registry index. The
+command centre reads \texttt{listCities()} and \texttt{getCity(id)}.
+\end{keyidea}
+
+Four packs ship:
+
+\begin{itemize}
+\item Bengaluru, Asia/Kolkata, ORR Silk Board to Marathahalli, Google+TomTom
+      when keyed, Open-Meteo always.
+\item London, Europe/London, A501 Marylebone to King's Cross, TfL.
+\item New York, America/New\_York, FDR Brooklyn Bridge to 96th Street,
+      NYC Open Data.
+\item Hong Kong, Asia/Hong\_Kong, Island East Central to Quarry Bay,
+      data.gov.hk / TD.
+\end{itemize}
+
+\begin{example}
+\texttt{getCity("london").tz} is \texttt{Europe/London}. An unknown id
+throws. Tests lock both facts.
+\end{example}
+
+\section{Live adapters and fusion}
+Each speed adapter returns zero or more readings
+\texttt{(junctionId, speedKmh, observedAtIso, source, freshnessS)} and never
+throws past the fusion layer. A missing key returns an empty list.
+
+Fusion (claims 3 and 4) assigns
+$w = 0.5\cdot\mathrm{freshness} + 0.3\cdot\mathrm{accuracy} + 0.2\cdot\mathrm{consistency}$.
+A source more than 15\,km/h from the median is down-weighted by $0.1$ unless
+every source agrees. The window is eight snapshots.
+
+\begin{implnote}
+On 01 September 2026 this machine received HTTP 200 from Open-Meteo
+(Bengaluru precipitation) and from NYC Open Data dataset \texttt{i4gi-tjb9}.
+TfL \texttt{/Road/all} returned 404 without an app key. The health panel
+must show that amber or red state rather than invent a speed.
+\end{implnote}
+
+Weather from Open-Meteo is not a speed. Rain millimetres scale the
+time-of-day prior when a billed traffic API is absent, and the panel labels
+the prior as such.
+
+\section{Hierarchy on live series}
+Claim 1 assigns three distinct language models by decision timescale. The
+smallest, quantized model sits at each junction and must finish inside
+200\,ms (claim 7). The corridor model computes offsets from predicted
+speeds (claim 8). The network model issues directives for incidents, VIP
+movements, and long-term pattern shifts (claim 9). Forecasts at 5, 15, and
+30 minutes are inputs to all three levels.
+
+If every speed adapter fails, junction agents switch to stored local logic
+and the banner reads that the twin is running on local logic. Partial
+failure fuses whatever remains.
+
+\begin{langbox}{Observe / Recommend / Actuate}
+Observe writes advisories only and is the Pages default.
+Recommend persists suggestions for a partner who holds keys on a server.
+Actuate would emit phase commands to SUMO TraCI or a field controller. This
+build refuses Actuate.
+\end{langbox}
+
+\section{Cameras}
+Cameras are optional. A city with \texttt{cameras: none} still counts as
+live on speeds. When a catalogue exists, parse it the way a Sentinel-style
+\texttt{GET /api/ingest} is parsed: ids, codec, live flag, RTSP, WHEP, HLS.
+The page JSON contains HLS or WHEP or JPEG only. RTSP stays on the capture
+process, forced over TCP, timed from PTS, reconnected with backoff 2--30\,s.
+
+\begin{warning}
+Do not wget a looping file and call it live. Do not publish into the
+gateway. Open at most four captures.
+\end{warning}
+
+\section{Evidence}
+The FER reply records delay reduced 65\%, mean speed up 17\%, queue length
+down 72\%, $p<0.001$, 15 trials, spatial MAE $3.23$\,km/h, temporal MAE
+$6.01$\,km/h. The repository quick-test table is a shorter harness. Do not
+quote 352\% throughput from the long A/B design as if it were that table.
+
+\section{How to run the briefing}
+Open the command centre, select Bengaluru, point at source health and the
+30-second cycle. Switch to London and confirm Marble Arch, not Silk Board.
+Open Cities on the website. State that Actuate is off. Direct licence
+questions to Yushu Excellence Technologies and Amit Dua, CSIS, BITS Pilani.
+
+\end{document}

@@ -3,6 +3,7 @@ import { CYCLE_STAGES } from "./types";
 import type {
   AgentEvent,
   ControllerMode,
+  JunctionMeta,
   JunctionState,
   Phase,
   ScenarioId,
@@ -37,8 +38,7 @@ function emptyApproaches() {
   };
 }
 
-function seedJunction(i: number): JunctionState {
-  const meta = JUNCTIONS[i];
+function seedJunction(meta: JunctionMeta, i: number): JunctionState {
   const approaches = emptyApproaches();
   return {
     ...meta,
@@ -88,27 +88,31 @@ function cloneJunctions(src: JunctionState[]): JunctionState[] {
   }));
 }
 
-function positionOnCorridor(progress: number): { lat: number; lon: number } {
-  const n = JUNCTIONS.length - 1;
+function positionOnCorridor(progress: number, metas: JunctionMeta[]): { lat: number; lon: number } {
+  const n = Math.max(1, metas.length - 1);
   const x = clamp(progress, 0, 0.999) * n;
-  const i = Math.floor(x);
-  const t = x - i;
-  const a = JUNCTIONS[i];
-  const b = JUNCTIONS[i + 1];
+  const i = Math.min(Math.floor(x), metas.length - 2);
+  const t = x - Math.floor(x);
+  const a = metas[Math.max(0, i)];
+  const b = metas[Math.min(metas.length - 1, i + 1)];
   return { lat: lerp(a.lat, b.lat, t), lon: lerp(a.lon, b.lon, t) };
 }
 
-function seedVehicles(): Vehicle[] {
+function seedVehicles(metas: JunctionMeta[]): Vehicle[] {
   return Array.from({ length: 36 }, (_, i) => {
     const progress = (i / 36) * 0.98;
     const dir: 1 | -1 = i % 2 === 0 ? 1 : -1;
-    const pos = positionOnCorridor(progress);
+    const pos = positionOnCorridor(progress, metas);
     return { id: i + 1, progress, dir, lat: pos.lat, lon: pos.lon, speed: 28 };
   });
 }
 
-export function createInitialState(scenario: ScenarioId = "morning_rush"): TwinState {
-  const junctions = JUNCTIONS.map((_, i) => seedJunction(i));
+export function createInitialState(
+  scenario: ScenarioId = "morning_rush",
+  metas: JunctionMeta[] = JUNCTIONS,
+  cityId = "bengaluru",
+): TwinState {
+  const junctions = metas.map((m, i) => seedJunction(m, i));
   return {
     running: true,
     simTime: 0,
@@ -125,7 +129,7 @@ export function createInitialState(scenario: ScenarioId = "morning_rush"): TwinS
       lastReason: "Fixed-time 40s split.",
       decisionConfidence: 1,
     })),
-    vehicles: seedVehicles(),
+    vehicles: seedVehicles(metas),
     events: [
       {
         id: 1,
@@ -144,6 +148,12 @@ export function createInitialState(scenario: ScenarioId = "morning_rush"): TwinS
     fixed: emptyKpis(),
     alerts: [],
     snapshots: [],
+    cityId,
+    operatingMode: "observe",
+    sourceHealth: [],
+    weatherMm: 0,
+    liveAgeS: 999,
+    cameras: [],
   };
 }
 
@@ -378,8 +388,16 @@ function accumulate(k: SessionKpis, junctions: JunctionState[], dt: number, simT
 
 function moveVehicles(state: TwinState, dt: number) {
   const speeds = state.junctions.map((j) => j.trueSpeed);
+  const metas = state.junctions.map((j) => ({
+    id: j.id,
+    name: j.name,
+    short: j.short,
+    lat: j.lat,
+    lon: j.lon,
+    character: j.character,
+  }));
   state.vehicles.forEach((v) => {
-    const idx = clamp(Math.floor(v.progress * (JUNCTIONS.length - 1)), 0, speeds.length - 1);
+    const idx = clamp(Math.floor(v.progress * (Math.max(1, metas.length - 1))), 0, speeds.length - 1);
     const local = speeds[idx] / 3600 / 12;
     v.speed = speeds[idx];
     v.progress += v.dir * local * dt * 18;
@@ -391,7 +409,7 @@ function moveVehicles(state: TwinState, dt: number) {
       v.progress = 0.01;
       v.dir = 1;
     }
-    const pos = positionOnCorridor(v.progress);
+    const pos = positionOnCorridor(v.progress, metas);
     v.lat = pos.lat;
     v.lon = pos.lon;
   });
@@ -538,10 +556,34 @@ export function tick(state: TwinState, dt = 1): TwinState {
   return state;
 }
 
-export function resetState(scenario: ScenarioId, speed: number): TwinState {
-  const next = createInitialState(scenario);
+export function resetState(
+  scenario: ScenarioId,
+  speed: number,
+  metas: JunctionMeta[] = JUNCTIONS,
+  cityId = "bengaluru",
+): TwinState {
+  const next = createInitialState(scenario, metas, cityId);
   next.speed = speed;
   return next;
+}
+
+export function applyLiveSpeeds(state: TwinState, fused: { junctionId: string; speedKmh: number; congestion01: number; google?: number; tomtom?: number; anomaly: boolean; freshness: number; accuracy: number; consistency: number; googleWeight: number; tomtomWeight: number }[]) {
+  fused.forEach((f) => {
+    const j = state.junctions.find((x) => x.id === f.junctionId);
+    if (!j) return;
+    j.fusedSpeed = f.speedKmh;
+    j.trueSpeed = f.speedKmh;
+    j.congestion = f.congestion01 * 100;
+    if (f.google != null) j.googleSpeed = f.google;
+    if (f.tomtom != null) j.tomtomSpeed = f.tomtom;
+    j.anomaly = f.anomaly;
+    j.freshness = f.freshness;
+    j.accuracy = f.accuracy;
+    j.consistency = f.consistency;
+    j.googleWeight = f.googleWeight;
+    j.tomtomWeight = f.tomtomWeight;
+  });
+  return state;
 }
 
 export function setScenario(state: TwinState, scenario: ScenarioId): TwinState {

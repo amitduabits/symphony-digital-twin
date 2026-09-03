@@ -4,6 +4,7 @@ import { Technology } from "./pages/Technology";
 import { Results } from "./pages/Results";
 import { IntellectualProperty } from "./pages/IntellectualProperty";
 import { Partnership } from "./pages/Partnership";
+import { Cities } from "./pages/Cities";
 import { CommandCenter } from "./pages/CommandCenter";
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
         <Route path="/results" element={<Results />} />
         <Route path="/ip" element={<IntellectualProperty />} />
         <Route path="/partnership" element={<Partnership />} />
+        <Route path="/cities" element={<Cities />} />
         <Route path="/app" element={<CommandCenter />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -1,7 +1,6 @@
 import { Fragment } from "react";
 import { CircleMarker, MapContainer, Polyline, Popup, TileLayer, Tooltip } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { JUNCTIONS } from "../engine";
 import { congestionColor, type JunctionState, type Vehicle } from "../engine";
 
 interface Props {
@@ -11,11 +10,14 @@ interface Props {
 }
 
 export default function MapView({ junctions, vehicles, height = 520 }: Props) {
-  const path = JUNCTIONS.map((j) => [j.lat, j.lon] as [number, number]);
+  const path = junctions.map((j) => [j.lat, j.lon] as [number, number]);
+  const center: [number, number] = path.length
+    ? [path.reduce((s, p) => s + p[0], 0) / path.length, path.reduce((s, p) => s + p[1], 0) / path.length]
+    : [12.93, 77.66];
 
   return (
     <div style={{ height }}>
-      <MapContainer center={[12.932, 77.66]} zoom={13} scrollWheelZoom>
+      <MapContainer center={center} zoom={13} scrollWheelZoom key={center.join(",")}>
         <TileLayer
           attribution='&copy; OpenStreetMap'
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"

@@ -1,13 +1,8 @@
-export type JunctionId =
-  | "silk_board"
-  | "hsr_layout"
-  | "agara"
-  | "bellandur"
-  | "kadubeesanahalli"
-  | "marathahalli";
+export type JunctionId = string;
 
 export type Phase = "NS" | "EW" | "YELLOW";
 export type ControllerMode = "symphony" | "fixed";
+export type OperatingMode = "observe" | "recommend" | "actuate";
 export type AppView =
   | "overview"
   | "map"
@@ -15,7 +10,8 @@ export type AppView =
   | "predict"
   | "fusion"
   | "twin"
-  | "results";
+  | "results"
+  | "cameras";
 
 export type ScenarioId =
   | "morning_rush"
@@ -148,6 +144,29 @@ export interface TwinState {
   fixed: SessionKpis;
   alerts: string[];
   snapshots: Snapshot[];
+  cityId: string;
+  operatingMode: OperatingMode;
+  sourceHealth: SourceHealth[];
+  weatherMm: number;
+  liveAgeS: number;
+  cameras: CameraCard[];
+}
+
+export interface SourceHealth {
+  id: string;
+  label: string;
+  status: "green" | "amber" | "red" | "off";
+  ageS: number;
+  lastError: string;
+}
+
+export interface CameraCard {
+  id: string;
+  location: string;
+  codec: string;
+  live: boolean;
+  previewUrl: string;
+  kind: "hls" | "whep" | "jpeg";
 }
 
 export const CYCLE_STAGES: CycleStage[] = [

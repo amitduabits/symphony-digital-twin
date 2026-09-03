@@ -1,0 +1,98 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% bitsbrand.sty -- BITS Pilani institutional identity
+%% CS F301 Principles of Programming Languages
+%%
+%% Colour values are sampled from the official bits-bar.png supplied by AUGSD
+%% and from the institutional handout template. Do not alter them.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{bitsbrand}[2025/08/02 v1.0 BITS Pilani branding for CS F301]
+
+\RequirePackage{xcolor}
+\RequirePackage{graphicx}
+\RequirePackage{tikz}
+
+%%--------------------------------------------------------------------------
+%% 1. Institutional palette (sampled, authoritative)
+%%--------------------------------------------------------------------------
+\definecolor{bitsblue}{HTML}{1A1A80}   % institutional blue, handout template
+\definecolor{bitsgold}{HTML}{FDAF18}   % brand bar, segment 1
+\definecolor{bitssky}{HTML}{74C3E8}    % brand bar, segment 2
+\definecolor{bitsred}{HTML}{EE1C25}    % brand bar, segment 3
+
+%%--------------------------------------------------------------------------
+%% 2. Semantic palette (Master Spec section 3.3)
+%% Colour carries meaning. Do not use these decoratively.
+%%--------------------------------------------------------------------------
+\definecolor{okgreen}{HTML}{1B7F4B}    % holds / correct / compiles
+\definecolor{errred}{HTML}{A61B29}     % fails / undefined / gotcha
+\definecolor{codebg}{HTML}{F5F5F2}     % listing background
+\definecolor{mutedgrey}{HTML}{5A5A5A}  % de-emphasised text
+\definecolor{rulegrey}{HTML}{D8D8D4}   % hairlines
+
+% Aliases so authors never guess
+\colorlet{bitsaccent}{bitsgold}
+\colorlet{bitsprimary}{bitsblue}
+
+%%--------------------------------------------------------------------------
+%% 3. Logo handling
+%% pdflatex chokes on some alpha PNGs. logo-bits.png is pre-flattened onto
+%% white. If a vector logo-bits.pdf is ever supplied, it wins automatically.
+%%--------------------------------------------------------------------------
+\IfFileExists{logo-bits.pdf}{\def\bits@logofile{logo-bits.pdf}}{%
+  \IfFileExists{common/logo-bits.pdf}{\def\bits@logofile{common/logo-bits.pdf}}{%
+    \IfFileExists{logo-bits.png}{\def\bits@logofile{logo-bits.png}}{%
+      \IfFileExists{common/logo-bits.png}{\def\bits@logofile{common/logo-bits.png}}{%
+        \def\bits@logofile{}}}}}
+
+% \bitslogo[<height>] -- default 2.2cm
+\newcommand{\bitslogo}[1][2.2cm]{%
+  \ifx\bits@logofile\@empty
+    \textcolor{errred}{\framebox{\rule{0pt}{#1}\ LOGO MISSING\ }}%
+  \else
+    \includegraphics[height=#1]{\bits@logofile}%
+  \fi}
+
+%%--------------------------------------------------------------------------
+%% 4. Brand rule bar
+%% Drawn in TikZ rather than included as a bitmap so it scales cleanly and
+%% carries no resolution penalty. Proportions match bits-bar.png: 32/40/28.
+%%--------------------------------------------------------------------------
+% \bitsbar[<width>][<thickness>]
+\newcommand{\bitsbar}[2][\linewidth]{%
+  \begingroup
+  \setlength{\unitlength}{1pt}%
+  \begin{tikzpicture}[x=1pt,y=1pt]
+    \pgfmathsetmacro{\bw}{\the\dimexpr#1\relax/1pt}
+    \pgfmathsetmacro{\bt}{\the\dimexpr#2\relax/1pt}
+    \fill[bitsgold] (0,0)             rectangle (0.32*\bw,\bt);
+    \fill[bitssky]  (0.32*\bw,0)      rectangle (0.72*\bw,\bt);
+    \fill[bitsred]  (0.72*\bw,0)      rectangle (\bw,\bt);
+  \end{tikzpicture}%
+  \endgroup}
+
+\newcommand{\bitsbardefault}{\bitsbar[\linewidth]{2.2pt}}
+
+%%--------------------------------------------------------------------------
+%% 5. Institutional name blocks
+%% Exact strings. Never retype these inline; always call the macro, so a
+%% future rename propagates through every deck and every set of notes.
+%%--------------------------------------------------------------------------
+\newcommand{\bitsname}{Birla Institute of Technology \& Science, Pilani}
+\newcommand{\bitscampus}{Pilani Campus}
+\newcommand{\bitsdivision}{AUGS/AGSR Division}
+\newcommand{\bitssemester}{First Semester 2025--26}
+
+\newcommand{\coursecode}{CS F301}
+\newcommand{\coursetitle}{Principles of Programming Languages}
+
+% Stacked identity block, used on title pages
+\newcommand{\bitsidentity}{%
+  \begingroup
+  \color{bitsblue}\sffamily
+  {\large\bfseries \bitsname}\\[0.15em]
+  {\normalsize \bitscampus}\\[0.15em]
+  {\normalsize\bfseries \bitsdivision}%
+  \endgroup}
+
+\endinput

@@ -10,7 +10,7 @@ describe("website routes", () => {
   it("lands on the industry home page", () => {
     window.location.hash = "#/";
     render(<App />);
-    expect(screen.getByRole("heading", { name: /working digital twin/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /any city you can grant access to/i })).toBeInTheDocument();
     expect(screen.getAllByText(/202611024014/).length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: /launch command centre/i })).toBeInTheDocument();
   });
@@ -18,6 +18,6 @@ describe("website routes", () => {
   it("redirects unknown hashes home", () => {
     window.location.hash = "#/does-not-exist";
     render(<App />);
-    expect(screen.getByRole("heading", { name: /working digital twin/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /any city you can grant access to/i })).toBeInTheDocument();
   });
 });

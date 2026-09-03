@@ -1,0 +1,224 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% csf301-beamer.sty -- Beamer theme for CS F301
+%%
+%% Usage:
+%%   \documentclass[aspectratio=169,11pt]{beamer}
+%%   \usepackage[minted]{csf301-beamer}
+%%   \moduleinfo{05}{Arrays}{L6}{Amit Dua}
+%%
+%% Deliberately has no stock Beamer theme underneath. Navigation symbols,
+%% sidebars, and progress dots are removed: they consume space and none of
+%% them help a student who is taking notes.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{csf301-beamer}[2025/08/02 v1.0 CS F301 Beamer theme]
+
+\DeclareOption{listings}{\PassOptionsToPackage{listings}{bitspreamble}}
+\DeclareOption{minted}{\PassOptionsToPackage{minted}{bitspreamble}}
+\ProcessOptions\relax
+
+\RequirePackage{bitspreamble}
+
+%%--------------------------------------------------------------------------
+%% 1. Strip Beamer's furniture
+%%--------------------------------------------------------------------------
+\usetheme{default}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize items}[circle]
+%% Note: do NOT use \setbeamertemplate{enumerate items}[default] -- it sends
+%% Beamer into infinite recursion. Style the counter colour instead.
+\setbeamercolor{enumerate item}{fg=bitsblue}
+\setbeamercolor{enumerate subitem}{fg=bitsblue!70}
+\setbeamertemplate{blocks}[rounded][shadow=false]
+\setbeamercovered{invisible}
+
+\setbeamerfont{frametitle}{size=\large,series=\bfseries}
+\setbeamercolor{frametitle}{fg=bitsblue,bg=white}
+\setbeamercolor{title}{fg=bitsblue}
+\setbeamercolor{structure}{fg=bitsblue}
+\setbeamercolor{itemize item}{fg=bitsgold!85!black}
+\setbeamercolor{itemize subitem}{fg=bitssky!70!black}
+\setbeamercolor{normal text}{fg=black}
+\setbeamercolor{alerted text}{fg=errred}
+\setbeamerfont{footline}{size=\tiny}
+
+%%--------------------------------------------------------------------------
+%% 2. Module metadata
+%% \moduleinfo{<number>}{<short name>}{<lectures>}{<instructor>}
+%%--------------------------------------------------------------------------
+\newcommand{\csf@modnum}{00}
+\newcommand{\csf@modname}{Untitled}
+\newcommand{\csf@lectures}{L?}
+\newcommand{\csf@instructor}{}
+\newcommand{\moduleinfo}[4]{%
+  \renewcommand{\csf@modnum}{#1}%
+  \renewcommand{\csf@modname}{#2}%
+  \renewcommand{\csf@lectures}{#3}%
+  \renewcommand{\csf@instructor}{#4}%
+  \title{Module #1: #2}%
+  \subtitle{\coursecode\ \textemdash\ \coursetitle}%
+  \author{#4}%
+  \date{\bitssemester}%
+}
+
+%%--------------------------------------------------------------------------
+%% 3. Frame title: title text over a thin brand rule
+%%--------------------------------------------------------------------------
+%% Logo sits at the TOP RIGHT of every content frame, beside the title.
+\setbeamertemplate{frametitle}{%
+  \vskip0.6em%
+  \begin{beamercolorbox}[wd=\paperwidth,leftskip=0.9cm,rightskip=0.9cm]{frametitle}%
+    \hbox to \dimexpr\paperwidth-1.8cm\relax{%
+      \begin{minipage}[c]{\dimexpr\paperwidth-3.4cm\relax}%
+        \usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}\insertframetitle%
+        \ifx\insertframesubtitle\@empty\else
+          \\[0.15em]{\small\normalfont\color{mutedgrey}\insertframesubtitle}%
+        \fi
+      \end{minipage}%
+      \hfil
+      \raisebox{-0.35em}{\bitslogo[0.95cm]}}%
+  \end{beamercolorbox}%
+  \vskip0.25em%
+  \hspace*{0.9cm}\bitsbar[\dimexpr\paperwidth-1.8cm\relax]{1.6pt}%
+  \vskip0.4em%
+}
+
+%%--------------------------------------------------------------------------
+%% 4. Footline: mini logo | course + module | frame n of N
+%%--------------------------------------------------------------------------
+%% Footline carries the frame number only; the logo lives at the top right.
+\setbeamertemplate{footline}{%
+  \hbox{%
+    \begin{beamercolorbox}[wd=\paperwidth,ht=2.4ex,dp=1.4ex,right,rightskip=0.55cm]{}%
+      \usebeamerfont{footline}\color{mutedgrey}%
+      \insertframenumber/\inserttotalframenumber%
+    \end{beamercolorbox}%
+  }%
+  \vskip1.5pt%
+}
+
+%%--------------------------------------------------------------------------
+%% 5. Title frame
+%%--------------------------------------------------------------------------
+\newcommand{\titleframecsf}{%
+\begingroup
+\setbeamertemplate{footline}{}
+\begin{frame}[plain]
+  \vspace{-0.4em}
+  \begin{minipage}[c]{0.16\textwidth}\bitslogo[1.75cm]\end{minipage}%
+  \begin{minipage}[c]{0.82\textwidth}\bitsidentity\end{minipage}
+
+  \vspace{0.5em}
+  \bitsbar[\textwidth]{2.6pt}
+
+  \vspace{1.4em}
+  {\color{mutedgrey}\sffamily\small \coursecode\ \textbar\ \coursetitle}
+
+  \vspace{0.5em}
+  {\color{bitsblue}\Large\bfseries Module \csf@modnum\ \textemdash\ \csf@modname}
+
+  \vspace{0.35em}
+  {\color{mutedgrey}\small Lectures \csf@lectures}
+
+  \vfill
+  \begin{minipage}[b]{\textwidth}
+    {\color{black}\csf@instructor}\\[0.15em]
+    {\color{mutedgrey}\small \bitssemester}
+  \end{minipage}
+  \vspace{0.4em}
+\end{frame}
+\endgroup}
+
+%%--------------------------------------------------------------------------
+%% 6. Structural frames required by Master Spec section 3.4
+%%--------------------------------------------------------------------------
+
+%% Beamer's frame environment scans for a literal \end{frame}, so no
+%% \newenvironment may wrap it. These are commands taking the body as an
+%% argument, which is the only construction that works.
+%%
+%%   \outcomesframe{\item Derive ... \item Predict ...}
+%%
+%% None of them may contain verbatim or a listing. If a structural frame
+%% needs code, write the frame yourself with [fragile].
+
+%% Learning outcomes. Verbs must come from Bloom's upper half.
+\newcommand{\outcomesframe}[1]{%
+  \frame{\frametitle{Outcomes}%
+    \begin{itemize}\itemsep0.7em #1\end{itemize}}}
+
+%% Design issues: the enumerated questions a language designer must answer.
+\newcommand{\designissuesframe}[1]{%
+  \frame{\frametitle{Design issues the language designer must settle}%
+    \begin{enumerate}\itemsep0.35em #1\end{enumerate}}}
+
+%%--------------------------------------------------------------------------
+%% Content-level boxes.
+%% These deliberately do NOT open a frame. Beamer collects an environment
+%% body before verbatim becomes safe, so any construct that may contain a
+%% listing must sit inside a frame the author opened with [fragile].
+%%
+%%   \begin{frame}[fragile]{Why is this loop slow?}
+%%     \begin{motivation} ... \end{motivation}
+%%   \end{frame}
+%%--------------------------------------------------------------------------
+
+%% Motivating question, restated at module end.
+\newtcolorbox{motivation}[1][]{%
+  colback=codebg, colframe=bitsgold, boxrule=1pt, arc=2pt,
+  left=6pt,right=6pt,top=5pt,bottom=5pt, #1}
+
+%% Implementation cost: what the feature costs and who pays.
+\newtcolorbox{implcost}[1][What this costs, and who pays]{%
+  colback=white, colframe=mutedgrey, boxrule=0.6pt, arc=1pt,
+  title={\sffamily\bfseries\scriptsize #1}, coltitle=white,
+  colbacktitle=mutedgrey, fonttitle=\scriptsize,
+  left=6pt,right=6pt,top=5pt,bottom=5pt}
+
+%% Gotcha: one real surprising behaviour per module.
+\newtcolorbox{gotcha}[1][This does not do what it looks like]{%
+  colback=errred!4, colframe=errred, boxrule=1pt, arc=2pt,
+  title={\sffamily\bfseries\scriptsize #1}, coltitle=white,
+  colbacktitle=errred, fonttitle=\scriptsize,
+  left=6pt,right=6pt,top=5pt,bottom=5pt}
+
+%% Summary. Five bullets maximum, no new content.
+\newcommand{\takeawaysframe}[1]{%
+  \frame{\frametitle{Summary}%
+    \begin{itemize}\itemsep0.55em #1\end{itemize}}}
+
+%%--------------------------------------------------------------------------
+%% 7. In-frame boxes, matching the notes environments visually
+%%--------------------------------------------------------------------------
+\newtcolorbox{keyideabox}[1][]{%
+  colback=bitsgold!8, colframe=bitsgold, boxrule=1pt, arc=2pt,
+  left=5pt,right=5pt,top=4pt,bottom=4pt, #1}
+
+\newtcolorbox{warnbox}[1][]{%
+  colback=errred!5, colframe=errred, boxrule=1pt, arc=2pt,
+  left=5pt,right=5pt,top=4pt,bottom=4pt, #1}
+
+\newtcolorbox{implbox}[1][]{%
+  colback=white, colframe=mutedgrey, boxrule=0.6pt, arc=1pt,
+  left=5pt,right=5pt,top=4pt,bottom=4pt, #1}
+
+%% Two-column language comparison shorthand
+\newenvironment{twolang}{%
+  \begin{columns}[T,onlytextwidth]}{%
+  \end{columns}}
+
+%% \begin{langpane}{<width>}{<language name>} ... \end{langpane}
+\newenvironment{langpane}[2]{%
+  \begin{column}{#1}%
+    \centering{\small\color{bitsblue}\sffamily\bfseries #2}\\[0.3em]}{%
+  \end{column}}
+
+%%--------------------------------------------------------------------------
+%% 8. Density guard
+%% Compiles a warning into the log when a frame carries too much. Not a hard
+%% error: the reviewer still has to look. It just makes the offence findable.
+%%--------------------------------------------------------------------------
+\newcommand{\densitynote}[1]{\PackageWarning{csf301-beamer}{Density check: #1}}
+
+\endinput

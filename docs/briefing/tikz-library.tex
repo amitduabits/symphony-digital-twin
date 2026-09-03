@@ -1,0 +1,226 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% tikz-library.tex -- shared diagram macros for CS F301
+%%
+%% \input{common/tikz-library} once, from the preamble of slides or notes.
+%%
+%% Every macro here produces a figure a student can redraw by hand on an
+%% answer sheet in under two minutes. If a new macro cannot meet that test,
+%% it does not belong in this file.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tikzset{
+  csfbox/.style   = {draw=bitsblue, thick, fill=white,
+                     minimum height=6mm, minimum width=22mm, font=\small\ttfamily},
+  csfslot/.style  = {draw=bitsblue!70, fill=white,
+                     minimum height=5.5mm, minimum width=16mm, font=\scriptsize\ttfamily},
+  csfhead/.style  = {draw=bitsblue, fill=bitsblue!12, thick,
+                     minimum height=6mm, minimum width=22mm,
+                     font=\small\sffamily\bfseries},
+  csfdead/.style  = {draw=errred, fill=errred!8, thick,
+                     minimum height=6mm, minimum width=22mm, font=\small\ttfamily},
+  csflive/.style  = {draw=okgreen, fill=okgreen!8, thick,
+                     minimum height=6mm, minimum width=22mm, font=\small\ttfamily},
+  csflabel/.style = {font=\scriptsize\sffamily, color=mutedgrey},
+  csfarrow/.style = {-{Stealth[length=2mm]}, bitsblue, thick},
+  csfdash/.style  = {-{Stealth[length=2mm]}, mutedgrey, dashed, thin},
+  csfnode/.style  = {draw=bitsblue, circle, thick, fill=white,
+                     inner sep=1.6pt, font=\small},
+  csfleaf/.style  = {draw=none, font=\small\ttfamily, color=black},
+}
+
+%%==========================================================================
+%% 1. ACTIVATION RECORDS AND THE CALL STACK   (M09, M10)
+%%==========================================================================
+%% \arframe{<x>}{<y>}{<name>}{<comma-list of slot labels, bottom to top>}
+%% Draws one activation record with a titled header and stacked slots.
+\newcounter{csf@slotcount}
+\newcommand{\arframe}[4]{%
+  \setcounter{csf@slotcount}{0}%
+  \foreach \slot in {#4} {\stepcounter{csf@slotcount}}%
+  \begin{scope}[shift={(#1,#2)}]
+    \foreach \slot [count=\i from 0] in {#4} {
+      \node[csfslot, anchor=south west] at (0, 0.55*\i) {\slot};
+    }
+    \node[csfhead, anchor=south west, minimum width=16mm]
+      at (0, {0.55*\value{csf@slotcount}}) {\scriptsize #3};
+  \end{scope}}
+
+%% \stacklabel{<x>}{<y>}{<text>} -- annotate a frame from the side
+\newcommand{\stacklabel}[3]{\node[csflabel, anchor=west] at (#1,#2) {#3};}
+
+%% \stackgrows{<x>}{<ytop>}{<ybot>} -- the downward growth arrow
+\newcommand{\stackgrows}[3]{%
+  \draw[csfdash] (#1,#2) -- (#1,#3)
+    node[midway, csflabel, rotate=90, anchor=south, yshift=2pt] {stack grows};}
+
+%%==========================================================================
+%% 2. HEAP BLOCKS AND POINTERS   (M07)
+%%==========================================================================
+%% \heapblock{<name>}{<x>}{<y>}{<content>}{<state: live|dead|plain>}
+\newcommand{\heapblock}[5]{%
+  \ifthenelse{\equal{#5}{dead}}%
+    {\node[csfdead, anchor=south west] (#1) at (#2,#3) {#4};}%
+    {\ifthenelse{\equal{#5}{live}}%
+      {\node[csflive, anchor=south west] (#1) at (#2,#3) {#4};}%
+      {\node[csfbox, anchor=south west] (#1) at (#2,#3) {#4};}}}
+
+%% \pointsto{<from>}{<to>} and \dangling{<from>}
+\newcommand{\pointsto}[2]{\draw[csfarrow] (#1) -- (#2);}
+\newcommand{\dangling}[1]{%
+  \draw[-{Stealth[length=2mm]}, errred, thick]
+    (#1) -- ++(1.2,0) node[anchor=west, csflabel, color=errred] {dangling};}
+\newcommand{\unreachable}[1]{%
+  \node[csflabel, color=errred, anchor=west, xshift=3mm] at (#1.east)
+    {unreachable};}
+
+%%==========================================================================
+%% 3. ARRAY LAYOUT AND ADDRESS COMPUTATION   (M05)
+%%==========================================================================
+%% \memrow{<x>}{<y>}{<n cells>}{<first index>}{<colour>}
+%% A run of contiguous memory cells with index labels beneath.
+\newcommand{\memrow}[5]{%
+  \begin{scope}[shift={(#1,#2)}]
+    \foreach \i in {0,...,\numexpr#3-1\relax} {
+      \node[draw=#5, fill=#5!10, minimum size=7mm, font=\scriptsize\ttfamily,
+            anchor=south west] at (0.7*\i, 0) {};
+      \node[csflabel, anchor=north] at (0.7*\i+0.35, -0.05)
+        {\pgfmathparse{int(\i+#4)}\pgfmathresult};
+    }
+  \end{scope}}
+
+%% \arraycell{<x>}{<y>}{<label>}{<colour>} -- one highlighted cell
+\newcommand{\arraycell}[4]{%
+  \node[draw=#4, fill=#4!25, thick, minimum size=7mm,
+        font=\scriptsize\ttfamily, anchor=south west] at (#1,#2) {#3};}
+
+%% \rowmajorgrid{<rows>}{<cols>} -- grid annotated with linear offsets
+\newcommand{\rowmajorgrid}[2]{%
+  \foreach \r in {0,...,\numexpr#1-1\relax} {
+    \foreach \c in {0,...,\numexpr#2-1\relax} {
+      \pgfmathtruncatemacro{\off}{\r*#2+\c}
+      \node[draw=bitsblue!70, fill=bitsblue!6, minimum size=8mm,
+            font=\scriptsize\ttfamily, anchor=north west]
+        at (0.8*\c, -0.8*\r) {\off};
+    }}}
+
+%% \colmajorgrid{<rows>}{<cols>}
+\newcommand{\colmajorgrid}[2]{%
+  \foreach \r in {0,...,\numexpr#1-1\relax} {
+    \foreach \c in {0,...,\numexpr#2-1\relax} {
+      \pgfmathtruncatemacro{\off}{\c*#1+\r}
+      \node[draw=bitsgold!80!black, fill=bitsgold!10, minimum size=8mm,
+            font=\scriptsize\ttfamily, anchor=north west]
+        at (0.8*\c, -0.8*\r) {\off};
+    }}}
+
+%%==========================================================================
+%% 4. PARSE TREES   (M01)
+%%==========================================================================
+%% Use with the standard TikZ tree syntax:
+%%   \begin{tikzpicture}[csftree]
+%%     \node{E} child {node{E}} child {node{+}} child {node{T}};
+%%   \end{tikzpicture}
+\tikzset{
+  csftree/.style = {
+    level distance      = 9mm,
+    sibling distance    = 16mm,
+    every node/.style   = {font=\small},
+    edge from parent/.style = {draw=bitsblue!70, thin,
+                               edge from parent path=
+                               {(\tikzparentnode) -- (\tikzchildnode)}},
+    level 1/.style = {sibling distance=26mm},
+    level 2/.style = {sibling distance=15mm},
+    level 3/.style = {sibling distance=11mm},
+  },
+  nonterm/.style = {font=\small\itshape, color=bitsblue},
+  termnode/.style = {font=\small\ttfamily, color=black},
+}
+
+%%==========================================================================
+%% 5. VTABLES AND DYNAMIC DISPATCH   (M14)
+%%==========================================================================
+%% \vtable{<name>}{<x>}{<y>}{<class label>}{<comma-list of method slots>}
+\newcommand{\vtable}[5]{%
+  \begin{scope}[shift={(#2,#3)}]
+    \node[csfhead, anchor=north west, minimum width=30mm] (#1head)
+      at (0,0) {\scriptsize #4};
+    \foreach \m [count=\i from 0] in {#5} {
+      \node[csfslot, anchor=north west, minimum width=30mm] (#1\i)
+        at (0, -0.6-0.55*\i) {\m};
+    }
+  \end{scope}}
+
+%% \objptr{<name>}{<x>}{<y>}{<label>} -- an object header holding a vptr
+\newcommand{\objptr}[4]{%
+  \node[csfbox, anchor=north west, minimum width=20mm] (#1) at (#2,#3) {#4};}
+
+%%==========================================================================
+%% 6. REDUCTION SEQUENCES   (M12, M13)
+%%==========================================================================
+%% \redstep{<term>}{<annotation>} -- one line of a beta-reduction trace
+\newcommand{\redstep}[2]{%
+  \noindent$#1$ \hfill {\csflabelfont #2}\par}
+\newcommand{\csflabelfont}{\scriptsize\sffamily\color{mutedgrey}}
+
+%% Confluence diamond for Church-Rosser
+%% \diamondCR{<top>}{<left>}{<right>}{<bottom>}
+\newcommand{\diamondCR}[4]{%
+  \node (t) at (0,2)      {$#1$};
+  \node (l) at (-1.8,1)   {$#2$};
+  \node (r) at (1.8,1)    {$#3$};
+  \node (b) at (0,0)      {$#4$};
+  \draw[csfarrow] (t) -- (l);
+  \draw[csfarrow] (t) -- (r);
+  \draw[csfarrow, dashed] (l) -- (b);
+  \draw[csfarrow, dashed] (r) -- (b);}
+
+%%==========================================================================
+%% 7. UNIFICATION AND SEARCH TREES   (M15)
+%%==========================================================================
+\tikzset{
+  csfsld/.style = {
+    level distance = 12mm,
+    sibling distance = 24mm,
+    every node/.style = {font=\scriptsize\ttfamily},
+    edge from parent/.style = {draw=bitsblue!70, thin,
+      edge from parent path={(\tikzparentnode) -- (\tikzchildnode)}},
+  },
+  csffail/.style = {font=\scriptsize\sffamily, color=errred},
+  csfsucc/.style = {font=\scriptsize\sffamily, color=okgreen},
+}
+
+%%==========================================================================
+%% 8. SCOPE AND BINDING CHAINS   (M02, M09)
+%%==========================================================================
+%% \scopebox{<name>}{<x>}{<y>}{<w>}{<h>}{<label>} -- a nested scope rectangle
+\newcommand{\scopebox}[6]{%
+  \draw[draw=bitsblue!60, thick, rounded corners=2pt]
+    (#2,#3) rectangle ++(#4,#5);
+  \node[csflabel, anchor=north west] at (#2+0.08,#3+#5-0.05) {#6};}
+
+%% \staticlink{<from>}{<to>} and \dynamiclink{<from>}{<to>}
+\newcommand{\staticlink}[2]{%
+  \draw[csfarrow] (#1) to[bend left=20] node[csflabel,above] {static} (#2);}
+\newcommand{\dynamiclink}[2]{%
+  \draw[-{Stealth[length=2mm]}, mutedgrey, thick] (#1)
+    to[bend right=20] node[csflabel,below] {dynamic} (#2);}
+
+%%==========================================================================
+%% 9. GENERIC COMPARISON STRIP
+%% A horizontal band of language names used to head cross-language figures.
+%%==========================================================================
+%% Boxes size themselves to their text and chain left to right, so long
+%% labels are never clipped.
+\newcommand{\langstrip}[1]{%
+  \coordinate (strip@prev) at (0,0);
+  \foreach \l [count=\i from 0] in {#1} {
+    \ifnum\i=0
+      \node[draw=bitsblue!40, fill=bitsblue!6, minimum height=8mm,
+            inner xsep=3mm, font=\small\sffamily, anchor=west]
+        (strip@prev) at (0,0) {\l};
+    \else
+      \node[draw=bitsblue!40, fill=bitsblue!6, minimum height=8mm,
+            inner xsep=3mm, font=\small\sffamily, anchor=west,
+            right=2mm of strip@prev] (strip@new) {\l};
+      \coordinate (strip@prev) at (strip@new.east);
+    \fi}}

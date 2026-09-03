@@ -1,0 +1,9 @@
+SYMPHONY live-city briefing (BITS house format)
+
+Style files sit beside the .tex files.
+
+    latexmk -pdf slides.tex
+    latexmk -pdf notes.tex
+
+These files use the listings engine, so Pygments is not required.
+Do not use minted unless you add -shell-escape and have Pygments.

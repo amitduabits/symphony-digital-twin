@@ -1,0 +1,155 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+\usepackage[listings]{csf301-beamer}
+\usepackage{ifthen}
+\input{tikz-library}
+\moduleinfo{01}{SYMPHONY Live City Twin}{Industry briefing}{Amit Dua}
+
+\begin{document}
+\titleframecsf
+
+\begin{frame}{What this briefing is}
+\begin{itemize}\itemsep0.7em
+\item A live working digital twin for traffic, not a six-junction cartoon
+\item Operator selects a city pack: Bengaluru, London, New York, Hong Kong
+\item A fifth city is a pack file, not a fork of the command centre
+\item Patent envelope: Indian application 202611024014, claims 1--10
+\end{itemize}
+\end{frame}
+
+\outcomesframe{
+\item Switch city and show the map, timezone, and agencies change
+\item Name the live adapters and what happens when a key is missing
+\item Trace one 30-second cycle from catalogue to advisory
+\item State Observe, Recommend, and Actuate without mixing them}
+
+\begin{frame}{The problem the patent addresses}
+\begin{itemize}\itemsep0.7em
+\item Fixed-time signals ignore the next half hour of demand
+\item One model at every junction cannot meet a sub-second budget and a
+      one-hour plan at once
+\item Cities will not buy a system that dies when one feed drops
+\item Partners outside Bengaluru will not accept Silk Board hard-coded
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Claim 1 in one diagram}
+\begin{center}\input{figures/arch}\end{center}
+\begin{itemize}\itemsep0.5em
+\item Three language models, distinct in size and latency, assigned by timescale
+\item Forecasts are an input to junction, corridor, and network agents
+\item Signal controllers keep a local fail-safe (claim 7)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{City pack: the contract}
+\begin{itemize}\itemsep0.7em
+\item \texttt{id, tz, bbox, agencies, corridor, adapters}
+\item Geometry: OpenStreetMap, cached for Pages, refresh in Recommend
+\item Speeds: whatever keys that city grants (Google, TomTom, TfL, NYC 511,
+      data.gov.hk)
+\item Cameras: optional catalogue. HLS or WHEP in the browser. Never RTSP JSON
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Four packs shipping today}
+\begin{itemize}\itemsep0.7em
+\item \textbf{Bengaluru.} ORR Silk Board to Marathahalli. BTP / GBA.
+      Google + TomTom when keyed. Open-Meteo always
+\item \textbf{London.} A501 Marylebone to King's Cross. TfL Unified API
+\item \textbf{New York.} FDR Brooklyn Bridge to 96th Street. NYC Open Data
+\item \textbf{Hong Kong.} Island East Central to Quarry Bay. TD / data.gov.hk
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Three operating modes}
+\begin{itemize}\itemsep0.9em
+\item \textbf{Observe.} Live APIs + OSM. Advisories only. Public Pages
+\item \textbf{Recommend.} Same plus logged phase and offset suggestions.
+      Partner with keys
+\item \textbf{Actuate.} Physical or SUMO write-back. Licensed pilot only.
+      Blocked in this build
+\end{itemize}
+\end{frame}
+
+\begin{frame}{30-second cycle (as filed)}
+\begin{itemize}\itemsep0.55em
+\item 0--5\,s collect adapters in parallel
+\item 5--8\,s fuse: freshness, accuracy, consistency; 3$\sigma$ down-weight
+\item 8--12\,s T-GNN 5 / 15 / 30 minute speeds
+\item 12--25\,s network, corridor, junction decisions
+\item 25--28\,s command generation (advisory here)
+\item 28--30\,s predicted versus observed (claim 10)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Timescales and model scale}
+\begin{itemize}\itemsep0.7em
+\item Junction (73--78): smallest, quantized, $\le$ 200\,ms (claims 6, 7)
+\item Corridor (72): intermediate, minutes, offsets from predicted speed
+      (claim 8)
+\item Network (71): largest, slowest, hours. Incidents, VIP, pattern shift
+      (claim 9)
+\item If the centre drops past the outage interval, local stored logic runs
+\end{itemize}
+\end{frame}
+
+\begin{frame}{What ``live'' means in this demo}
+\begin{itemize}\itemsep0.7em
+\item Source health panel: green / amber / red, age in seconds
+\item Open-Meteo precipitation is a real HTTP call (Bengaluru 200 today)
+\item NYC Open Data traffic speeds: HTTP 200 on i4gi-tjb9
+\item Google / TomTom stay off Pages (no keys in the browser)
+\item Missing keys do not blank the map. The twin keeps running
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Cameras, if a city grants them}
+\begin{itemize}\itemsep0.7em
+\item Start from a catalogue GET, never a guessed \texttt{/stream/id}
+\item RTSP over TCP for inference. HLS if 8554 is blocked. WHEP for preview
+\item Timing from PTS, never arrival time, never declared FPS
+\item Backoff 2\,s to 30\,s. Decode warnings at join are logs, not fatal
+\item Consume only. Cap four open captures
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Command centre, this evening}
+\begin{itemize}\itemsep0.7em
+\item Open \texttt{\#/app}. Select city. Clock follows that timezone
+\item Overview: health, 30\,s cycle, six junction cards, agent feed
+\item Switch London: Marble Arch to King's Cross, not Silk Board
+\item Cameras tab: honest empty state when the pack has no catalogue
+\item Actuate option is labelled blocked
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Evidence already on file}
+\begin{itemize}\itemsep0.7em
+\item Delay $-65\%$, speed $+17\%$, queue $-72\%$ versus fixed-time
+      (FER reply, $p<0.001$, 15 trials)
+\item Spatial MAE $3.23$\,km/h, temporal MAE $6.01$\,km/h
+\item Quick-test harness is a separate table. Do not mix it with 352\%
+      throughput from the longer A/B design
+\end{itemize}
+\end{frame}
+
+\begin{frame}{What a partner can do next}
+\begin{itemize}\itemsep0.7em
+\item Observe on Pages today, no install
+\item Recommend: supply Google/TomTom or a city token. Keys stay on a backend
+\item Actuate: licence 202611024014, then a controller adapter
+\item Fifth city: one pack, OSM bbox, one corridor, optional catalogue
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Where the bits live}
+\begin{itemize}\itemsep0.7em
+\item App: https://amitduabits.github.io/symphony-digital-twin/\#/app
+\item Source: https://github.com/amitduabits/symphony-digital-twin
+\item Live-city book: \texttt{docs/LIVE\_CITY\_PROMPTBOOK.md}
+\item Applicant: Yushu Excellence Technologies Pvt.\ Ltd.
+\item Inventor: Amit Dua, CSIS, BITS Pilani
+\end{itemize}
+\end{frame}
+
+\end{document}

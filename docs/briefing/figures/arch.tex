@@ -1,0 +1,15 @@
+\begin{tikzpicture}[font=\small, node distance=7mm]
+\node[draw, rounded corners, fill=bitsgold!15, align=center, minimum width=2.6cm] (pack) {City pack\\bbox, tz, adapters};
+\node[draw, rounded corners, fill=white, align=center, minimum width=2.6cm, right=12mm of pack] (osm) {OSM geometry};
+\node[draw, rounded corners, fill=white, align=center, minimum width=2.6cm, right=12mm of osm] (spd) {Speed adapters};
+\node[draw, rounded corners, fill=bitsblue!12, align=center, minimum width=2.6cm, below=10mm of osm] (fuse) {Fusion + window};
+\node[draw, rounded corners, fill=white, align=center, minimum width=2.6cm, below=10mm of pack] (pred) {T-GNN forecast};
+\node[draw, rounded corners, fill=white, align=center, minimum width=2.6cm, below=10mm of spd] (agt) {Three agents};
+\draw[-latex] (pack) -- (osm);
+\draw[-latex] (pack) -- (spd);
+\draw[-latex] (osm) -- (fuse);
+\draw[-latex] (spd) -- (fuse);
+\draw[-latex] (fuse) -- (pred);
+\draw[-latex] (fuse) -- (agt);
+\draw[-latex] (pred) -- (agt);
+\end{tikzpicture}

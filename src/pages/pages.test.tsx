@@ -6,6 +6,7 @@ import { Home } from "./Home";
 import { IntellectualProperty } from "./IntellectualProperty";
 import { Partnership } from "./Partnership";
 import { Results } from "./Results";
+import { Cities } from "./Cities";
 import { Technology } from "./Technology";
 
 function mount(ui: ReactElement) {
@@ -15,7 +16,7 @@ function mount(ui: ReactElement) {
 describe("website pages", () => {
   it("home states the offer and the launch CTA", () => {
     mount(<Home />);
-    expect(screen.getByRole("heading", { name: /working digital twin/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /any city you can grant access to/i })).toBeInTheDocument();
     expect(screen.getAllByText(/202611024014/).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: /launch command centre|enter the digital twin/i }).length).toBeGreaterThan(0);
   });
@@ -42,6 +43,14 @@ describe("website pages", () => {
     expect(screen.getAllByText(/amended claims 1–10/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/FER dated 23 June 2026/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Claim 7/i).length).toBeGreaterThan(0);
+  });
+
+  it("cities lists four packs", () => {
+    mount(<Cities />);
+    expect(screen.getAllByText(/Bengaluru/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/London/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/New York/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Hong Kong/).length).toBeGreaterThan(0);
   });
 
   it("partnership exposes a named form to Amit Dua", () => {

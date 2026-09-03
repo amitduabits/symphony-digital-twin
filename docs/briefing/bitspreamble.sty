@@ -1,0 +1,169 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% bitspreamble.sty -- shared machinery for CS F301 slides and notes
+%%
+%% Loaded by both csf301-beamer.sty and csf301-notes.cls. Everything that must
+%% look and behave identically in the two artefacts lives here, so that a
+%% definition, a listing, or a symbol cannot drift between them.
+%%
+%% Package options:
+%%   minted    use minted + Pygments (default; requires -shell-escape)
+%%   listings  use listings only (portable fallback, no shell escape)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{bitspreamble}[2025/08/02 v1.0 CS F301 shared preamble]
+
+\newif\ifcsf@minted \csf@mintedtrue
+\DeclareOption{minted}{\csf@mintedtrue}
+\DeclareOption{listings}{\csf@mintedfalse}
+\ProcessOptions\relax
+
+\RequirePackage{bitsbrand}
+
+%%--------------------------------------------------------------------------
+%% 1. Encoding and fonts
+%% Preferences degrade gracefully. A thin TeX installation still compiles;
+%% it simply falls back to Latin Modern. Pin the real fonts in README.md.
+%%--------------------------------------------------------------------------
+\RequirePackage[T1]{fontenc}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage{textcomp}
+
+% Serif text. Every branch is guarded, and the chain ends in a no-op so that
+% a minimal TeX installation still produces a PDF. Pin the intended fonts in
+% README.md; the fallbacks exist for CI and for a co-author's laptop, not as
+% an acceptable shipping state.
+\newif\ifcsf@scalablefont \csf@scalablefonttrue
+\IfFileExists{libertinus.sty}{\RequirePackage{libertinus}}{%
+  \IfFileExists{newtxtext.sty}{\RequirePackage{newtxtext}\RequirePackage{newtxmath}}{%
+    \IfFileExists{lmodern.sty}{\RequirePackage{lmodern}}{%
+      \csf@scalablefontfalse
+      \PackageWarning{bitspreamble}{No preferred text font found; falling back
+        to bitmap Computer Modern and disabling microtype expansion. Install
+        libertinus or newtx before shipping.}}}}
+
+% Monospace: Inconsolata (zi4), then Source Code Pro, then the default
+\IfFileExists{zi4.sty}{\RequirePackage[varqu,varl,scaled=0.95]{zi4}}{%
+  \IfFileExists{sourcecodepro.sty}{\RequirePackage[scaled=0.95]{sourcecodepro}}{%
+    \PackageWarning{bitspreamble}{No preferred mono font found; code will
+      set in the default typewriter face. Install inconsolata.}}}
+
+\IfFileExists{microtype.sty}{%
+  \ifcsf@scalablefont
+    \RequirePackage{microtype}%
+  \else
+    \RequirePackage[expansion=false,protrusion=false]{microtype}%
+  \fi}{}
+
+%%--------------------------------------------------------------------------
+%% 2. Mathematics and symbols
+%%--------------------------------------------------------------------------
+\RequirePackage{amsmath,amssymb,amsthm}
+\RequirePackage{mathtools}
+\RequirePackage{stmaryrd}   % \llbracket for denotational semantics
+
+%%--------------------------------------------------------------------------
+%% 3. Tables, graphics, layout
+%%--------------------------------------------------------------------------
+\RequirePackage{booktabs}
+\RequirePackage{array}
+\RequirePackage{multirow}
+\RequirePackage{tabularx}
+%% enumitem sends Beamer's enumerate into infinite recursion. Load it only
+%% outside Beamer. In slides, use Beamer's own list spacing instead.
+\@ifclassloaded{beamer}{}{\RequirePackage{enumitem}}
+\RequirePackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\RequirePackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit,shapes.geometric,
+                shapes.multipart,backgrounds,decorations.pathreplacing,
+                matrix,chains,patterns}
+
+%%--------------------------------------------------------------------------
+%% 4. Code listings
+%%--------------------------------------------------------------------------
+\ifcsf@minted
+  \RequirePackage{minted}
+  \setminted{
+    bgcolor=codebg,
+    fontsize=\small,
+    breaklines=true,
+    breakanywhere=true,
+    tabsize=2,
+    autogobble=true,
+    frame=none,
+    xleftmargin=0.6em,
+  }
+  \setminted[text]{bgcolor=white,fontsize=\small}
+\else
+  \RequirePackage{listings}
+  \lstdefinestyle{csf301}{
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{bitsblue}\bfseries,
+    commentstyle=\color{mutedgrey}\itshape,
+    stringstyle=\color{okgreen},
+    showstringspaces=false,
+    breaklines=true,
+    tabsize=2,
+    columns=fullflexible,
+    frame=none,
+    xleftmargin=0.6em,
+  }
+  \lstset{style=csf301}
+  % Dialects the course uses that listings does not ship
+  \lstdefinelanguage{Haskell2}[]{Haskell}{}
+  \lstdefinelanguage{Racket}[]{Lisp}{morekeywords={define,lambda,let,let*,letrec,cond,else}}
+  \lstdefinelanguage{Rust}{morekeywords={fn,let,mut,struct,enum,impl,match,ref,move,
+    unsafe,pub,use,mod,trait,for,in,while,loop,if,else,return,Box,Vec},
+    sensitive=true,morecomment=[l]{//},morecomment=[s]{/*}{*/},morestring=[b]"}
+  \lstdefinelanguage{Smalltalk}{morekeywords={self,super,true,false,nil,thisContext},
+    sensitive=true,morecomment=[s]{"}{"},morestring=[b]'}
+\fi
+
+%% \code{...} for inline code in both artefacts. Never write \texttt{} directly.
+\newcommand{\code}[1]{{\ttfamily\small #1}}
+
+%% \lang{C} -- name a language in running prose, consistently styled
+\newcommand{\lang}[1]{\textsf{#1}}
+
+%%--------------------------------------------------------------------------
+%% 5. Semantic markup (Master Spec section 3.3)
+%% These are the only ways to add colour. If an author reaches for \textcolor
+%% directly, the reviewer sends it back.
+%%--------------------------------------------------------------------------
+\newcommand{\term}[1]{\textcolor{bitsgold!85!black}{\bfseries #1}}  % first use of a term
+\newcommand{\holds}[1]{\textcolor{okgreen}{#1}}                     % correct case
+\newcommand{\fails}[1]{\textcolor{errred}{#1}}                      % failure case
+\newcommand{\muted}[1]{\textcolor{mutedgrey}{#1}}
+
+%% Course-specific notation, fixed here so M11 and M12 cannot diverge.
+\newcommand{\lam}[2]{\lambda #1 .\, #2}          % lambda abstraction
+\newcommand{\app}[2]{#1\,#2}                     % application
+\newcommand{\redb}{\rightarrow_{\beta}}          % beta reduction
+\newcommand{\redbs}{\twoheadrightarrow_{\beta}}  % many-step beta
+\newcommand{\reda}{\equiv_{\alpha}}              % alpha equivalence
+\newcommand{\rede}{\rightarrow_{\eta}}           % eta reduction
+\newcommand{\subst}[3]{#1[#2 := #3]}             % substitution
+\newcommand{\FV}[1]{\mathrm{FV}(#1)}             % free variables
+\newcommand{\den}[1]{\llbracket #1 \rrbracket}   % denotational brackets
+\newcommand{\tyjudge}[3]{#1 \vdash #2 : #3}      % typing judgement
+\newcommand{\unifies}{\doteq}                    % unification
+
+%%--------------------------------------------------------------------------
+%% 6. Cross-referencing
+%%--------------------------------------------------------------------------
+\RequirePackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=bitsblue,
+  citecolor=bitsblue,
+  urlcolor=bitsblue,
+  bookmarksnumbered=true,
+  bookmarksopen=true,
+  pdfcreator={CS F301 build},
+}
+\RequirePackage[capitalise,nameinlink]{cleveref}
+\crefname{definition}{Definition}{Definitions}
+\Crefname{definition}{Definition}{Definitions}
+
+\endinput

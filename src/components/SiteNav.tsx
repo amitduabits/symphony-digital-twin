@@ -4,6 +4,7 @@ const links = [
   { to: "/technology", label: "Technology" },
   { to: "/results", label: "Results" },
   { to: "/ip", label: "Patent" },
+  { to: "/cities", label: "Cities" },
   { to: "/partnership", label: "Industry" },
 ];
 

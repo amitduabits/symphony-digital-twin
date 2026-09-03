@@ -13,6 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import { TwinProvider, useTwin } from "../context/TwinContext";
+import { listCities } from "../cities/registry";
 import {
   CYCLE_STAGES,
   EVALUATION,
@@ -25,6 +26,7 @@ import {
   pctDelta,
   type AppView,
   type JunctionState,
+  type OperatingMode,
 } from "../engine";
 
 const MapView = lazy(() => import("../components/MapView"));
@@ -37,6 +39,7 @@ const TABS: { id: AppView; label: string }[] = [
   { id: "fusion", label: "Fusion" },
   { id: "twin", label: "Twin A/B" },
   { id: "results", label: "Evaluation" },
+  { id: "cameras", label: "Cameras" },
 ];
 
 export function CommandCenter() {
@@ -48,10 +51,11 @@ export function CommandCenter() {
 }
 
 function OpsShell() {
-  const { state, view, setView, toggle, reset, changeScenario, changeSpeed } = useTwin();
+  const { state, city, view, setView, toggle, reset, changeScenario, changeSpeed, changeCity, changeMode } = useTwin();
   const stage = currentStage(state.cycleSecond);
   const delayDelta = pctDelta(state.symphony.delaySeconds, state.fixed.delaySeconds);
   const speedDelta = pctDelta(state.symphony.meanSpeed, state.fixed.meanSpeed);
+  const clock = new Date().toLocaleTimeString("en-GB", { timeZone: city.tz, hour: "2-digit", minute: "2-digit" });
 
   return (
     <div className="ops">
@@ -59,11 +63,13 @@ function OpsShell() {
         <div className="ops-brand">
           <span className={`live-dot ${state.running ? "" : "off"}`} />
           <strong>SYMPHONY</strong>
-          <span className="tiny">ORR digital twin · Silk Board → Marathahalli</span>
+          <span className="tiny">
+            {city.name} · {city.corridors[0]?.name} · {clock} {city.tz}
+          </span>
         </div>
         <div className="tiny mono">
           t {formatSimTime(state.simTime)} · cycle {state.cycleNumber} · {stage.label} ·{" "}
-          {state.cycleSecond.toFixed(0)}s / 30s
+          {state.cycleSecond.toFixed(0)}s / 30s · {state.operatingMode}
         </div>
         <Link to="/" className="tiny">
           ← Website
@@ -78,6 +84,22 @@ function OpsShell() {
           ))}
         </div>
         <div className="ops-ctrl">
+          <select value={city.id} onChange={(e) => changeCity(e.target.value)} aria-label="City">
+            {listCities().map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          <select
+            value={state.operatingMode}
+            onChange={(e) => changeMode(e.target.value as OperatingMode)}
+            aria-label="Mode"
+          >
+            <option value="observe">Observe</option>
+            <option value="recommend">Recommend</option>
+            <option value="actuate">Actuate (blocked)</option>
+          </select>
           <select value={state.scenario} onChange={(e) => changeScenario(e.target.value as typeof state.scenario)}>
             {SCENARIOS.map((s) => (
               <option key={s.id} value={s.id}>
@@ -118,6 +140,7 @@ function OpsShell() {
         {view === "fusion" && <FusionPane />}
         {view === "twin" && <TwinPane />}
         {view === "results" && <EvalPane />}
+        {view === "cameras" && <CamerasPane />}
       </div>
     </div>
   );
@@ -137,11 +160,27 @@ function Kpi({ label, value, delta }: { label: string; value: string; delta?: "u
 }
 
 function Overview() {
-  const { state } = useTwin();
+  const { state, city } = useTwin();
   const stage = currentStage(state.cycleSecond);
   return (
     <div className="ops-grid">
       <div>
+        <div className="panel" style={{ marginBottom: 12 }}>
+          <h3>Source health · {city.name}</h3>
+          {state.sourceHealth.length === 0 && (
+            <p className="tiny">Polling live adapters (Open-Meteo, city open data). Keys stay off GitHub Pages.</p>
+          )}
+          {state.sourceHealth.map((h) => (
+            <div key={h.id} className="tiny" style={{ marginBottom: 4 }}>
+              <span style={{ color: h.status === "green" ? "#3DDC97" : h.status === "amber" ? "#F0B429" : "#FF5C5C" }}>●</span>{" "}
+              {h.label} · {h.status}
+              {h.lastError ? ` · ${h.lastError}` : ""} · weather {state.weatherMm.toFixed(1)} mm
+            </div>
+          ))}
+          {state.junctions.some((j) => j.failSafe) && (
+            <div className="alert">Running on local logic (claim 7). Live sources incomplete.</div>
+          )}
+        </div>
         <div className="panel" style={{ marginBottom: 12 }}>
           <h3>30-second operational cycle</h3>
           <div className="cycle">
@@ -508,6 +547,44 @@ function EvalPane() {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function CamerasPane() {
+  const { city, state } = useTwin();
+  if (city.adapters.cameras === "none") {
+    return (
+      <div className="panel">
+        <h3>Cameras</h3>
+        <p>
+          {city.name} pack has no camera catalogue. Speeds and OSM still run. Attach a catalogue URL
+          to show a wall. Browser preview is HLS or WHEP only. RTSP never enters page JSON.
+        </p>
+      </div>
+    );
+  }
+  if (!state.cameras.length) {
+    return (
+      <div className="panel">
+        <h3>Cameras · {city.name}</h3>
+        <p className="tiny">
+          Catalogue adapter enabled ({city.adapters.cameras}). No preview URLs in this session.
+          Consume only. Cap four open captures. TCP for RTSP.
+        </p>
+      </div>
+    );
+  }
+  return (
+    <div className="junc-grid">
+      {state.cameras.map((c) => (
+        <div key={c.id} className="panel">
+          <h3>{c.location || c.id}</h3>
+          <p className="tiny">
+            {c.kind} · {c.codec} · {c.live ? "live" : "offline"}
+          </p>
+        </div>
+      ))}
     </div>
   );
 }
